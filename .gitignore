@@ -1,0 +1,54 @@
+# ==============================================================================
+# 1. PYTHON & VIRTUAL ENVIRONMENTS
+# ==============================================================================
+.venv/
+RareProtSelect/.venv/
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# ==============================================================================
+# 2. PYTHON BYTECODE & CACHE
+# ==============================================================================
+__pycache__/
+*/__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# ==============================================================================
+# 3. HEAVY ARTIFACTS & EXPERIMENT CACHE (>100MB RISKS)
+# ==============================================================================
+# Embeddings & Similarity matrices (reproducible from source code)
+RareProtSelect/outputs/embeddings_cache/*.npy
+RareProtSelect/outputs/similarity_cache/*
+*.npy
+*.npz
+*.pt
+*.pth
+*.bin
+*.h5
+
+# ==============================================================================
+# 4. AGENTS & IDE LOGS
+# ==============================================================================
+.agents/
+.gemini/
+.idea/
+.vscode/*
+!.vscode/settings.json
+
+# ==============================================================================
+# 5. OPERATING SYSTEM ARTIFACTS
+# ==============================================================================
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+desktop.ini
+.DS_Store
