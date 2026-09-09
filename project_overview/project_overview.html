@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bảng Điều Khiển Tổng Quan Dự Án - RareProtSelect (Đề Tài 2)</title>
+  
+  <!-- KaTeX for Rendering Math Formulas -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <style>
+    :root {
+      --bg-main: #0f172a;
+      --bg-surface: #1e293b;
+      --bg-card: rgba(30, 41, 59, 0.7);
+      --bg-card-hover: rgba(51, 65, 85, 0.85);
+      --bg-glass: rgba(15, 23, 42, 0.8);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(56, 189, 248, 0.5);
+      --primary: #38bdf8;
+      --primary-hover: #0ea5e9;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Left Sidebar */
+    .sidebar {
+      width: 340px;
+      min-width: 340px;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 20px;
+      gap: 18px;
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    .tech-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .badge {
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--primary);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .badge-accent {
+      background: rgba(99, 102, 241, 0.15);
+      color: #818cf8;
+      border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .badge-success {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-warning {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    .search-box {
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 10px 12px 10px 36px;
+      color: var(--text-main);
+      font-size: 0.85rem;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--border-focus);
+      background: rgba(15, 23, 42, 1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    .nav-tabs {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.25s ease;
+    }
+
+    .tab-btn:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+    }
+
+    .tab-btn.active {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--primary);
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+      padding-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 30px 38px;
+      scroll-behavior: smooth;
+    }
+
+    .tab-panel {
+      display: none;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .tab-panel.active {
+      display: flex;
+    }
+
+    /* Header Banner */
+    .banner {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 22px 26px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .banner-title {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .banner-desc {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+
+    .banner-stats {
+      display: flex;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .stat-box {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 10px 14px;
+      text-align: center;
+      min-width: 90px;
+    }
+
+    .stat-number {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 2px;
+    }
+
+    /* Grids */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 18px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .card:hover {
+      border-color: rgba(56, 189, 248, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-body {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .card-body p {
+      margin-bottom: 8px;
+    }
+
+    .card-body ul {
+      padding-left: 18px;
+      margin-bottom: 8px;
+    }
+
+    .card-body li {
+      margin-bottom: 4px;
+    }
+
+    /* Folder Tree */
+    .tree-container {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 14px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.85rem;
+      max-height: 480px;
+      overflow-y: auto;
+    }
+
+    .tree-item {
+      margin: 3px 0;
+      user-select: none;
+    }
+
+    .tree-folder {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--primary);
+      font-weight: 600;
+      padding: 3px 6px;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    .tree-folder:hover {
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    .tree-file {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+      padding: 2px 6px 2px 22px;
+      border-radius: 4px;
+    }
+
+    .tree-file:hover {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-main);
+    }
+
+    .tree-children {
+      margin-left: 16px;
+      border-left: 1px dashed rgba(255, 255, 255, 0.1);
+      padding-left: 8px;
+    }
+
+    .tree-children.collapsed {
+      display: none;
+    }
+
+    /* Mathematical Callouts */
+    .math-block {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-left: 4px solid var(--primary);
+      padding: 14px 18px;
+      border-radius: 6px;
+      margin: 10px 0;
+      color: #e2e8f0;
+      overflow-x: auto;
+    }
+
+    .math-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    /* Accordion */
+    .accordion {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .accordion-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .accordion-header {
+      padding: 14px 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      user-select: none;
+    }
+
+    .accordion-header:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .accordion-content {
+      display: none;
+      padding: 18px;
+      border-top: 1px solid var(--border-color);
+      background: rgba(15, 23, 42, 0.5);
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .accordion-item.active .accordion-content {
+      display: block;
+    }
+
+    .accordion-item.active .accordion-header {
+      color: var(--primary);
+    }
+
+    /* Step Sequence Flow */
+    .step-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+    }
+
+    .step-box {
+      background: rgba(30, 41, 59, 0.9);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 16px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      background: var(--primary);
+      color: #0f172a;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .step-num-accent {
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .step-num-success {
+      background: var(--success);
+      color: #0f172a;
+    }
+
+    .step-details {
+      flex: 1;
+    }
+
+    .step-title {
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 4px;
+      font-size: 0.96rem;
+    }
+
+    /* Interactive Table */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      margin: 8px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      text-align: left;
+    }
+
+    th {
+      background: rgba(15, 23, 42, 0.85);
+      color: var(--primary);
+      padding: 12px 14px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    td {
+      padding: 11px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-muted);
+      vertical-align: middle;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text-main);
+    }
+
+    .highlight-win {
+      color: #34d399;
+      font-weight: 700;
+    }
+
+    .highlight-neutral {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Entity Schema Boxes (Flat ERD) */
+    .erd-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .erd-card {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .erd-card-header {
+      background: rgba(56, 189, 248, 0.15);
+      border-bottom: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 8px 12px;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.84rem;
+    }
+
+    .erd-card-body {
+      padding: 8px 12px;
+    }
+
+    .erd-field {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+      font-size: 0.82rem;
+    }
+
+    .erd-field:last-child {
+      border-bottom: none;
+    }
+
+    .erd-field-name {
+      color: var(--text-main);
+      font-family: monospace;
+    }
+
+    .erd-field-type {
+      color: #818cf8;
+      font-family: monospace;
+      font-size: 0.76rem;
+    }
+
+    /* KaTeX styling overrides */
+    .katex {
+      font-size: 1.02em;
+    }
+    .katex-display {
+      margin: 6px 0;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Left Sidebar (Fixed) -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+        PROJECT OVERVIEW
+      </div>
+      <div class="brand-subtitle">Topic 2: RareProtSelect & Submodular Optimization</div>
+    </div>
+
+    <div class="tech-badges">
+      <span class="badge">Python 3.12</span>
+      <span class="badge">PyTorch 2.13 (CUDA 13.0)</span>
+      <span class="badge">ESM-2 35M/150M</span>
+      <span class="badge badge-accent">Max-Heap Lazy Greedy</span>
+      <span class="badge badge-accent">RTX 5060 GPU</span>
+      <span class="badge badge-success">235 Tests Passed (100%)</span>
+    </div>
+
+    <div class="search-box">
+      <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" id="filterInput" class="search-input" placeholder="Tìm kiếm module, thực nghiệm, kết quả...">
+    </div>
+
+    <nav class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('tab-structure', event)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        1. Structure Flow (Kiến Trúc)
+      </button>
+
+      <button class="tab-btn" onclick="switchTab('tab-dataflow', event)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
+        2. Data Flow (Luồng Dữ Liệu)
+      </button>
+
+      <button class="tab-btn" onclick="switchTab('tab-data-erd', event)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+          <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+          <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+        </svg>
+        3. Data & Benchmark (Thực Nghiệm)
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div>Trạng thái: <strong style="color:var(--success);">Đã Hoàn Tất 100% Thực Nghiệm</strong></div>
+      <div>Độ phủ kiểm thử: <strong style="color:var(--success);">235/235 Tests Pass (100%)</strong></div>
+      <div>Cập nhật lần cuối: <strong>02/09/2026</strong></div>
+      <div>Nguồn sự thật: <strong>Single Source of Truth (SSOT)</strong></div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+
+    <!-- TAB 1: STRUCTURE & OVERVIEW -->
+    <section id="tab-structure" class="tab-panel active">
+      <div class="banner">
+        <div>
+          <h1 class="banner-title">RareProtSelect: Tối Ưu Hóa Submodular Ưu Tiên Nhóm Hiếm</h1>
+          <p class="banner-desc">
+            Hệ thống lựa chọn tập protein đại diện có <strong>ưu tiên nhóm hiếm (Rare-Aware Weighted Facility Location)</strong> dựa trên không gian nhúng mô hình ngôn ngữ protein (ESM-2 PLM). Khắc phục triệt để hiện tượng phân họ lớn áp đảo phân họ hiếm trong bài báo nền (*Nguyen et al., Scientific Reports 2025*).
+          </p>
+        </div>
+        <div class="banner-stats">
+          <div class="stat-box">
+            <div class="stat-number">+75.9%</div>
+            <div class="stat-label">Macro-F1 Gain</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">100%</div>
+            <div class="stat-label">Rare Rep @ k=400</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">64.8x</div>
+            <div class="stat-label">Lazy Speedup</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Metrics Summary Cards -->
+      <div class="grid-4">
+        <div class="card" style="padding:14px;">
+          <div class="card-header"><span style="color:var(--text-muted); font-size:0.78rem;">PILOT BENCHMARK</span><span class="badge badge-success">ThYme DB</span></div>
+          <div style="font-size:1.25rem; font-weight:700; color:var(--primary);">97.0% Coverage</div>
+          <p style="font-size:0.8rem; color:var(--text-muted);">Khớp chuẩn chuyên gia Thioesterase (27 họ, 737 chuỗi).</p>
+        </div>
+
+        <div class="card" style="padding:14px;">
+          <div class="card-header"><span style="color:var(--text-muted); font-size:0.78rem;">CORE BENCHMARK</span><span class="badge badge-accent">MEROPS A1A</span></div>
+          <div style="font-size:1.25rem; font-weight:700; color:#818cf8;">100% vs 3.6%</div>
+          <p style="font-size:0.8rem; color:var(--text-muted);">Tỷ lệ đại diện nhóm hiếm tại $k=400$ trên 13,847 chuỗi.</p>
+        </div>
+
+        <div class="card" style="padding:14px;">
+          <div class="card-header"><span style="color:var(--text-muted); font-size:0.78rem;">ANNOTATION TRANSFER</span><span class="badge badge-success">Downstream</span></div>
+          <div style="font-size:1.25rem; font-weight:700; color:#34d399;">0.3721 vs 0.2400</div>
+          <p style="font-size:0.8rem; color:var(--text-muted);">1-NN Macro-F1 tăng +55.0% đến +75.9% so với baseline.</p>
+        </div>
+
+        <div class="card" style="padding:14px;">
+          <div class="card-header"><span style="color:var(--text-muted); font-size:0.78rem;">SCALABILITY SPEEDUP</span><span class="badge badge-warning">ESTHER CE</span></div>
+          <div style="font-size:1.25rem; font-weight:700; color:#fbbf24;">16.4s vs 17.8 min</div>
+          <p style="font-size:0.8rem; color:var(--text-muted);">Lazy Greedy nhanh gấp 64.8x trên 12,277 chuỗi.</p>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              Bối Cảnh & Đột Phá Khoa Học Cốt Lõi
+            </h3>
+          </div>
+          <div class="card-body">
+            <p><strong>Bối cảnh & Vấn đề nan giải:</strong> Các họ protein trong cơ sở dữ liệu lớn (như UniProt, MEROPS, ESTHER) phân bố theo phân phối đuôi dài (Long-tail distribution). Phân họ phổ biến chiếm tới 90-99% chuỗi, trong khi phân họ hiếm chỉ có từ 1-5 chuỗi.</p>
+            <p><strong>Lỗ hổng của Bài báo nền (Nguyen et al., 2025):</strong> Thuật toán Unweighted Facility Location ($w_v = 1$) tối ưu hóa trên số đông, dẫn tới <strong>bỏ rơi hoàn toàn 28/28 phân họ hiếm</strong> ($0\%$ đại diện ở ngân sách $k \le 200$).</p>
+            <p><strong>Giải pháp Đột phá của RareProtSelect:</strong></p>
+            <ul>
+              <li><strong>Trọng số Rare-Aware:</strong> Gán trọng số $w_v = 1/\sqrt{n_{g(v)}}$ giúp cân bằng Pareto vàng: khuếch đại nhóm hiếm mà không làm tổn hại độ bao phủ toàn thể ($>99.3\%$).</li>
+              <li><strong>Không gian Ngữ nghĩa ESM-2:</strong> Nắm bắt liên kết tiến hóa xa (Remote Homology) mà các phương pháp căn chỉnh chuỗi (BLAST/CD-HIT) bỏ sót.</li>
+              <li><strong>Tối ưu hóa Max-Heap Lazy Greedy:</strong> Giảm 98.7% phép tính biên, tăng tốc gấp 64.8 lần trên GPU RTX 5060.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+              Cây Thư Mục Dự Án Toàn Diện (Interactive Folder Tree)
+            </h3>
+          </div>
+          <div class="tree-container">
+            <div class="tree-item">
+              <div class="tree-folder" onclick="toggleTree(this)">
+                <span>📂</span> <strong>/ (Workspace Root: Topic 2)</strong>
+              </div>
+              <div class="tree-children">
+                <div class="tree-item"><div class="tree-file">📄 <strong>GEMINI.md</strong> <span style="color:var(--primary); font-size:0.75rem;">[Quy tắc SSOT & Hardware Specs]</span></div></div>
+                <div class="tree-item"><div class="tree-file">📄 <strong>quy_trinh_thuc_hien_va_cac_cong_doan.md</strong> <span style="color:#34d399; font-size:0.75rem;">[SSOT Tài liệu 1]</span></div></div>
+                <div class="tree-item"><div class="tree-file">📄 <strong>thiet_ke_codebase_va_kien_truc_he_thong.md</strong> <span style="color:#818cf8; font-size:0.75rem;">[SSOT Tài liệu 2]</span></div></div>
+                <div class="tree-item"><div class="tree-file">📄 <strong>bao_cao_ket_qua_chi_tiet_topic2.md</strong> <span style="color:#fbbf24; font-size:0.75rem;">[Báo cáo Khoa học Toàn cảnh]</span></div></div>
+                
+                <div class="tree-item">
+                  <div class="tree-folder" onclick="toggleTree(this)">
+                    <span>📂</span> <strong>RareProtSelect/ (Core Codebase)</strong>
+                  </div>
+                  <div class="tree-children">
+                    <div class="tree-item"><div class="tree-file">📄 <strong>pyproject.toml / uv.lock</strong> <span style="color:var(--text-dim); font-size:0.75rem;">[uv Package Management]</span></div></div>
+                    <div class="tree-item">
+                      <div class="tree-folder" onclick="toggleTree(this)">
+                        <span>📂</span> <strong>configs/</strong>
+                      </div>
+                      <div class="tree-children">
+                        <div class="tree-item"><div class="tree-file">⚙️ config_pilot_thyme.yaml</div></div>
+                        <div class="tree-item"><div class="tree-file">⚙️ config_core_merops.yaml</div></div>
+                        <div class="tree-item"><div class="tree-file">⚙️ config_scalability_ce.yaml</div></div>
+                        <div class="tree-item"><div class="tree-file">⚙️ config_ablation.yaml</div></div>
+                      </div>
+                    </div>
+                    <div class="tree-item">
+                      <div class="tree-folder" onclick="toggleTree(this)">
+                        <span>📂</span> <strong>src/ (10 Submodules)</strong>
+                      </div>
+                      <div class="tree-children">
+                        <div class="tree-item"><div class="tree-file">📦 <strong>config/</strong> settings.py</div></div>
+                        <div class="tree-item"><div class="tree-file">📦 <strong>data/</strong> fasta_parser.py, quality_filter.py, annotation_mapper.py, dataset_loader.py</div></div>
+                        <div class="tree-item"><div class="tree-file">📦 <strong>embeddings/</strong> esm_embedder.py, cache_manager.py</div></div>
+                        <div class="tree-item"><div class="tree-file">📦 <strong>similarity/</strong> dense_similarity.py, sparse_knn.py</div></div>
+                        <div class="tree-item"><div class="tree-file">📦 <strong>weighting/</strong> rare_weighting.py ($w_v = 1/\sqrt{n_g}$)</div></div>
+                        <div class="tree-item"><div class="tree-file">📦 <strong>selection/</strong> lazy_greedy.py (Max-Heap), standard_greedy.py, baseline_selectors.py</div></div>
+                        <div class="tree-item"><div class="tree-file">📦 <strong>evaluation/</strong> intrinsic_metrics.py, annotation_transfer.py, benchmark_comparator.py</div></div>
+                        <div class="tree-item"><div class="tree-file">📦 <strong>utils/</strong> timer.py, memory_tracker.py, visualizer.py, exporter.py</div></div>
+                      </div>
+                    </div>
+                    <div class="tree-item">
+                      <div class="tree-folder" onclick="toggleTree(this)">
+                        <span>📂</span> <strong>experiments/ (4 Main Runners)</strong>
+                      </div>
+                      <div class="tree-children">
+                        <div class="tree-item"><div class="tree-file">🚀 run_pilot_thyme.py</div></div>
+                        <div class="tree-item"><div class="tree-file">🚀 run_core_merops.py</div></div>
+                        <div class="tree-item"><div class="tree-file">🚀 run_scalability_ce.py</div></div>
+                        <div class="tree-item"><div class="tree-file">🚀 run_ablation_all.py</div></div>
+                      </div>
+                    </div>
+                    <div class="tree-item">
+                      <div class="tree-folder" onclick="toggleTree(this)">
+                        <span>📂</span> <strong>outputs/</strong>
+                      </div>
+                      <div class="tree-children">
+                        <div class="tree-item"><div class="tree-file">📊 <strong>tables/</strong> 15 CSV/JSON/MD tables</div></div>
+                        <div class="tree-item"><div class="tree-file">📈 <strong>figures/</strong> 20 PNG/SVG publication-ready charts</div></div>
+                        <div class="tree-item"><div class="tree-file">💾 <strong>embeddings_cache/</strong> Disk-cached embeddings</div></div>
+                      </div>
+                    </div>
+                    <div class="tree-item">
+                      <div class="tree-folder" onclick="toggleTree(this)">
+                        <span>📂</span> <strong>tests/ (235 Unit & Adversarial Tests)</strong>
+                      </div>
+                      <div class="tree-children">
+                        <div class="tree-item"><div class="tree-file">🧪 test_lazy_vs_standard_greedy.py (100% equivalence proof)</div></div>
+                        <div class="tree-item"><div class="tree-file">🧪 test_adversarial_layer1..4.py</div></div>
+                        <div class="tree-item"><div class="tree-file">🧪 test_annotation_transfer.py</div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="tree-item">
+                  <div class="tree-folder" onclick="toggleTree(this)">
+                    <span>📂</span> <strong>baseline_repo/ (Original Benchmark)</strong>
+                  </div>
+                  <div class="tree-children">
+                    <div class="tree-item"><div class="tree-file">📁 Datasets & BLAST code từ Nguyen et al. (2025)</div></div>
+                  </div>
+                </div>
+
+                <div class="tree-item">
+                  <div class="tree-folder" onclick="toggleTree(this)">
+                    <span>📂</span> <strong>project_overview/</strong>
+                  </div>
+                  <div class="tree-children">
+                    <div class="tree-item"><div class="tree-file">🌐 <strong>project_overview.html</strong> <span style="color:var(--primary); font-size:0.75rem;">[Trang Tổng Quan Tương Tác]</span></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Core Modules Breakdown Cards -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+            Bảng Phân Rã 8 Thành Phần Cốt Lõi (Architecture Modules)
+          </h3>
+        </div>
+        <div class="grid-4">
+          <div class="step-box">
+            <div class="step-num">1</div>
+            <div class="step-details">
+              <div class="step-title">Data Ingestion & QC</div>
+              <p style="font-size:0.83rem; color:var(--text-muted);">Phân tích FASTA, lọc chuỗi ký tự lạ, lọc độ dài min/max, ánh xạ phân họ ThYme / MEROPS / ESTHER.</p>
+            </div>
+          </div>
+
+          <div class="step-box">
+            <div class="step-num">2</div>
+            <div class="step-details">
+              <div class="step-title">ESM-2 Embedder</div>
+              <p style="font-size:0.83rem; color:var(--text-muted);">Trích xuất vector ngữ nghĩa $z(v) \in \mathbb{R}^d$ qua ESM-2 (tùy chọn 35M/150M) trên GPU với cơ chế cache đĩa an toàn.</p>
+            </div>
+          </div>
+
+          <div class="step-box">
+            <div class="step-num">3</div>
+            <div class="step-details">
+              <div class="step-title">Similarity Engine</div>
+              <p style="font-size:0.83rem; color:var(--text-muted);">Tính Cosine Similarity không âm $\operatorname{sim}(u, v) = \max(0, \cos(z_u, z_v))$ dạng Dense GPU Tensor hoặc Sparse k-NN Graph.</p>
+            </div>
+          </div>
+
+          <div class="step-box">
+            <div class="step-num">4</div>
+            <div class="step-details">
+              <div class="step-title">Rare Weighting</div>
+              <p style="font-size:0.83rem; color:var(--text-muted);">Gán trọng số $w_v = 1/\sqrt{n_g}$ chứng minh đạt điểm cân bằng Pareto vàng so với các hàm $\alpha = 0, 0.25, 0.75, 1.0$.</p>
+            </div>
+          </div>
+
+          <div class="step-box">
+            <div class="step-num step-num-accent">5</div>
+            <div class="step-details">
+              <div class="step-title">Lazy Greedy WFL</div>
+              <p style="font-size:0.83rem; color:var(--text-muted);">Bộ tối ưu Submodular Max-Heap tăng tốc $64.8\times$, đảm bảo nghiệm chính xác $100\%$ và cận lý thuyết $\ge 63.2\%$.</p>
+            </div>
+          </div>
+
+          <div class="step-box">
+            <div class="step-num step-num-accent">6</div>
+            <div class="step-details">
+              <div class="step-title">Baseline Selectors</div>
+              <p style="font-size:0.83rem; color:var(--text-muted);">Tập hợp đối thủ đối chuẩn: Unweighted FL (Nguyen 2025), CD-HIT, MMseqs2, k-medoids, Random Selection.</p>
+            </div>
+          </div>
+
+          <div class="step-box">
+            <div class="step-num step-num-success">7</div>
+            <div class="step-details">
+              <div class="step-title">Downstream Evaluator</div>
+              <p style="font-size:0.83rem; color:var(--text-muted);">Đánh giá 1-NN Annotation Transfer (Macro-F1, Worst-group F1) và Intrinsic Metrics (Coverage, Redundancy, Rare-Hit).</p>
+            </div>
+          </div>
+
+          <div class="step-box">
+            <div class="step-num step-num-success">8</div>
+            <div class="step-details">
+              <div class="step-title">Viz & Exporter</div>
+              <p style="font-size:0.83rem; color:var(--text-muted);">Tự động xuất 15 bảng Markdown/CSV/JSON và vẽ 20 biểu đồ PNG/SVG độ phân giải cao phục vụ viết bài báo.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: DATA FLOW & ALGORITHMS -->
+    <section id="tab-dataflow" class="tab-panel">
+      <div class="banner">
+        <div>
+          <h1 class="banner-title">Luồng Dữ Liệu & Thuật Toán Tối Ưu Hóa (Data Flow)</h1>
+          <p class="banner-desc">Chi tiết quy trình chuyển đổi tuần tự từ chuỗi amino acid thô sang tập đại diện tối ưu và cơ chế tăng tốc Max-Heap.</p>
+        </div>
+      </div>
+
+      <div class="accordion">
+        <div class="accordion-item active">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <span>Luồng 1: Quy Trình Lựa Chọn Chuỗi Đại Diện Toàn Diện (End-to-End Pipeline)</span>
+            <span>▼</span>
+          </div>
+          <div class="accordion-content">
+            <div class="step-flow">
+              <div class="step-box">
+                <div class="step-num">1</div>
+                <div class="step-details">
+                  <div class="step-title">FASTA Parser & Quality Control (QC)</div>
+                  <p>Hệ thống nạp tệp FASTA, chuẩn hóa chuỗi (chỉ giữ 20 amino acid chuẩn), loại bỏ chuỗi quá ngắn ($<30$ AA) hoặc quá dài, và phân tách nhãn định danh phân họ $g(v)$.</p>
+                </div>
+              </div>
+              <div class="step-box">
+                <div class="step-num">2</div>
+                <div class="step-details">
+                  <div class="step-title">Trích xuất Vector Ngữ nghĩa qua ESM-2 PLM</div>
+                  <p>Chuyển từng chuỗi amino acid qua mạng Transformer của ESM-2 (`esm2_t6_8M`, `esm2_t12_35M` hoặc `esm2_t30_150M`). Áp dụng Mean Pooling trên các residue để thu được vector biểu diễn tĩnh $z(v) \in \mathbb{R}^d$ ($d=480$ hoặc $d=640$).</p>
+                </div>
+              </div>
+              <div class="step-box">
+                <div class="step-num">3</div>
+                <div class="step-details">
+                  <div class="step-title">Xây dựng Ma Trận Tương Đồng Cosine Không Âm</div>
+                  <p>Tính toán độ tương đồng ngữ nghĩa: $\operatorname{sim}(u, v) = \max\{0, \cos(z_u, z_v)\}$. Việc cắt ngưỡng không âm là điều kiện tiên quyết đảm bảo hàm mục tiêu thỏa mãn tính đơn điệu (Monotonicity) và tính Submodular.</p>
+                </div>
+              </div>
+              <div class="step-box">
+                <div class="step-num">4</div>
+                <div class="step-details">
+                  <div class="step-title">Tính Trọng Số Nhóm Hiếm (Rare-Aware Weighting)</div>
+                  <p>Đếm số lượng cá thể trong từng phân họ $n_{g(v)}$. Gán trọng số nghịch đảo căn bậc hai: $w_v = \frac{1}{\sqrt{n_{g(v)}}}$. Các protein thuộc phân họ cực hiếm ($n_g = 1$) sẽ nhận trọng số gấp $18.4$ lần so với protein thuộc nhóm lớn ($n_g = 339$).</p>
+                </div>
+              </div>
+              <div class="step-box">
+                <div class="step-num">5</div>
+                <div class="step-details">
+                  <div class="step-title">Thực Thi Lazy Greedy WFL Optimizer (Max-Heap)</div>
+                  <p>Khởi tạo tập $S = \emptyset$. Lần lượt duyệt phần tử đỉnh Heap để tìm chuỗi có Marginal Gain $\Delta(v \mid S)$ thực tế lớn nhất và nạp vào $S$ cho đến khi đạt ngân sách $k$.</p>
+                </div>
+              </div>
+              <div class="step-box">
+                <div class="step-num">6</div>
+                <div class="step-details">
+                  <div class="step-title">Đánh Giá Đối Chuẩn & Chú Giải Chức Năng (1-NN Transfer)</div>
+                  <p>Sử dụng tập $S$ để dự đoán nhãn phân họ cho tất cả protein còn lại $V \setminus S$ thông qua bộ phân loại 1-Nearest Neighbor trên không gian ESM-2. Đo lường Macro-F1, Worst-group Coverage và Rare-Hit Rate.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <span>Luồng 2: Cơ Chế Tăng Tốc Max-Heap Lazy Greedy (Giảm 98.7% Phép Tính Biên)</span>
+            <span>▼</span>
+          </div>
+          <div class="accordion-content">
+            <p><strong>Cơ sở toán học:</strong> Nhờ tính chất Submodular (Diminishing Marginal Returns), Marginal Gain của một chuỗi protein $\Delta(v \mid S)$ chỉ có thể <em>giảm dần hoặc giữ nguyên</em> khi tập $S$ được bổ sung thêm phần tử mới:</p>
+            
+            <div class="math-block">
+              <div class="math-title">Định Lý Lợi Ích Biên Giảm Dần (Submodular Property)</div>
+              $$A \subseteq B \subseteq V \implies \Delta(v \mid A) \ge \Delta(v \mid B) \quad \forall v \in V \setminus B$$
+            </div>
+
+            <p><strong>Quy trình thực thi Max-Heap:</strong></p>
+            <ol style="padding-left: 20px; margin: 10px 0;">
+              <li>Đưa toàn bộ phần tử $v \in V$ vào Max-Heap với khóa là Upper Bound của Marginal Gain.</li>
+              <li>Tại mỗi bước chọn, rút phần tử $v_{\text{top}}$ có Gain ước lượng cao nhất.</li>
+              <li>Nếu Gain của $v_{\text{top}}$ đã được tính toán ở trạng thái tập $S$ hiện tại $\implies$ <strong>Chốt ngay $v_{\text{top}}$ là nghiệm tối ưu toàn cục</strong> (do tất cả các phần tử khác trong Heap có cận trên nhỏ hơn giá trị thực tế của $v_{\text{top}}$).</li>
+              <li>Nếu Gain chưa được cập nhật, tính lại $\Delta(v_{\text{top}} \mid S)$ thực tế và đẩy trở lại Heap để tự động tái sắp xếp.</li>
+            </ol>
+            <p><strong>Hiệu quả thực tế:</strong> Tại $k=500$ trên 12,277 chuỗi CE, Standard Greedy phải tính $6,131,000$ phép tính biên, trong khi Lazy Greedy chỉ cần tính $78,439$ lần (giảm **$78.2\times$**), rút ngắn thời gian từ **17.8 phút xuống còn 16.4 giây**!</p>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <span>Luồng 3: Cơ Chế Truyền Nhãn Chức Năng Hạ Nguồn (Annotation Transfer Protocol)</span>
+            <span>▼</span>
+          </div>
+          <div class="accordion-content">
+            <p>Để đánh giá giá trị ứng dụng thực tiễn của tập đại diện $S$, quy trình kiểm chứng độc lập tuân thủ quy tắc <strong>Zero Data Leakage</strong>:</p>
+            <ul>
+              <li><strong>Tập Huấn luyện (Train/Prototype):</strong> Tập đại diện $S$ do thuật toán lựa chọn ($|S| = k$).</li>
+              <li><strong>Tập Kiểm tra (Test Query):</strong> Toàn bộ các chuỗi chưa được chọn $V_{\text{test}} = V \setminus S$.</li>
+              <li><strong>Quy tắc Gán nhãn (1-NN Cosine):</strong> Với mỗi chuỗi $u \in V_{\text{test}}$, nhãn phân họ dự đoán là:
+                $$\hat{y}(u) = y\left(\arg\max_{s \in S} \operatorname{sim}_{PLM}(u, s)\right)$$
+              </li>
+              <li><strong>Chỉ số Đo Lường:</strong> Macro-F1 (trọng số bình đẳng giữa tất cả phân họ, bảo vệ nhóm hiếm) và Worst-Group F1 (đo độ chính xác của phân họ bị phân loại tệ nhất).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: DATA & ERD / EXPERIMENTAL RESULTS -->
+    <section id="tab-data-erd" class="tab-panel">
+      <div class="banner">
+        <div>
+          <h1 class="banner-title">Mô Hình Dữ Liệu & Bảng Đối Đầu Thực Nghiệm 1-1</h1>
+          <p class="banner-desc">Sơ đồ thực thể ERD, các bộ dữ liệu thực nghiệm độc lập và bảng kết quả đo lường toàn diện so với Bài báo nền (Nguyen et al., 2025).</p>
+        </div>
+      </div>
+
+      <!-- Flat ERD / Data Schemas -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+            Sơ Đồ Thực Thể Dữ Liệu (Flat ERD Schemas)
+          </h3>
+        </div>
+        <div class="erd-container">
+          <div class="erd-card">
+            <div class="erd-card-header">
+              <span>ProteinSequence</span>
+              <span>Entity (Raw FASTA)</span>
+            </div>
+            <div class="erd-card-body">
+              <div class="erd-field"><span class="erd-field-name">seq_id (PK)</span><span class="erd-field-type">String</span></div>
+              <div class="erd-field"><span class="erd-field-name">raw_sequence</span><span class="erd-field-type">Text (20 AAs)</span></div>
+              <div class="erd-field"><span class="erd-field-name">length</span><span class="erd-field-type">Integer</span></div>
+              <div class="erd-field"><span class="erd-field-name">subfamily_id (FK)</span><span class="erd-field-type">String</span></div>
+              <div class="erd-field"><span class="erd-field-name">is_qc_passed</span><span class="erd-field-type">Boolean</span></div>
+            </div>
+          </div>
+
+          <div class="erd-card">
+            <div class="erd-card-header">
+              <span>SubfamilyMetadata</span>
+              <span>Entity (Taxonomy/Group)</span>
+            </div>
+            <div class="erd-card-body">
+              <div class="erd-field"><span class="erd-field-name">subfamily_id (PK)</span><span class="erd-field-type">String</span></div>
+              <div class="erd-field"><span class="erd-field-name">family_name</span><span class="erd-field-type">String</span></div>
+              <div class="erd-field"><span class="erd-field-name">sequence_count ($n_g$)</span><span class="erd-field-type">Integer</span></div>
+              <div class="erd-field"><span class="erd-field-name">rare_weight ($w_v$)</span><span class="erd-field-type">Float ($1/\sqrt{n_g}$)</span></div>
+              <div class="erd-field"><span class="erd-field-name">is_rare_group ($\le 5$)</span><span class="erd-field-type">Boolean</span></div>
+            </div>
+          </div>
+
+          <div class="erd-card">
+            <div class="erd-card-header">
+              <span>ESM2Embedding</span>
+              <span>Vector Feature Entity</span>
+            </div>
+            <div class="erd-card-body">
+              <div class="erd-field"><span class="erd-field-name">seq_id (PK, FK)</span><span class="erd-field-type">String</span></div>
+              <div class="erd-field"><span class="erd-field-name">model_variant</span><span class="erd-field-type">String (35M/150M)</span></div>
+              <div class="erd-field"><span class="erd-field-name">embedding_vec ($z$)</span><span class="erd-field-type">Float32 Tensor [d]</span></div>
+              <div class="erd-field"><span class="erd-field-name">norm</span><span class="erd-field-type">Float32</span></div>
+            </div>
+          </div>
+
+          <div class="erd-card">
+            <div class="erd-card-header">
+              <span>RepresentativeSet ($S$)</span>
+              <span>Optimization Output</span>
+            </div>
+            <div class="erd-card-body">
+              <div class="erd-field"><span class="erd-field-name">rank (1..k)</span><span class="erd-field-type">Integer</span></div>
+              <div class="erd-field"><span class="erd-field-name">seq_id (FK)</span><span class="erd-field-type">String</span></div>
+              <div class="erd-field"><span class="erd-field-name">marginal_gain ($\Delta$)</span><span class="erd-field-type">Float</span></div>
+              <div class="erd-field"><span class="erd-field-name">cumulative_objective</span><span class="erd-field-type">Float</span></div>
+              <div class="erd-field"><span class="erd-field-name">group_covered</span><span class="erd-field-type">String</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 Benchmark Datasets Role Summary -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+            Phân Định Vai Trò Độc Lập Của 3 Bộ Dữ Liệu Thực Nghiệm (Strict Separation)
+          </h3>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Tệp Dữ Liệu</th>
+                <th>Quy Mô Chuỗi</th>
+                <th>Phân Họ / Nhóm</th>
+                <th>Đặc Điểm Phân Phối</th>
+                <th>Vai Trò Khoa Học Trong Đề Tài</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Thioesterases_Sequences.fasta</strong></td>
+                <td>737 chuỗi</td>
+                <td>27 họ ThYme (TE01 - TE27)</td>
+                <td>Khá đồng đều (11 - 104 chuỗi/họ)</td>
+                <td><strong>Pilot & Gold Standard Benchmark:</strong> Kiểm tra độ khớp với tập đại diện do Chuyên gia sinh học chọn lọc thủ công.</td>
+              </tr>
+              <tr>
+                <td><strong>MEROPS_A1A.fasta</strong></td>
+                <td>13,847 chuỗi</td>
+                <td>76 phân họ (A01.001 - A01.098)</td>
+                <td><strong>Mất cân bằng cực đoan:</strong> 339 chuỗi xuống 1 chuỗi. 28 phân họ hiếm ($\le 5$).</td>
+                <td><strong>Vũ Khí Thực Nghiệm Chủ Lực:</strong> Chứng minh bước nhảy vọt của Rare Representation Rate (+100%) và Macro-F1 (+75.9%).</td>
+              </tr>
+              <tr>
+                <td><strong>CE.fasta</strong></td>
+                <td>12,277 chuỗi</td>
+                <td>12 nhóm ESTHER</td>
+                <td>Siêu họ Carboxylesterase quy mô lớn</td>
+                <td><strong>Scalability & Compute Benchmark:</strong> Đo lường hệ số tăng tốc 64.8x và khả năng tiết kiệm RAM/GPU của Lazy Greedy.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Core 1-1 Comparison Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            Bảng Đối Đầu Trực Diện 1-1: RareProtSelect vs. Bài Báo Nền (Nguyen et al., 2025) trên 13,847 chuỗi MEROPS A1A
+          </h3>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Ngân sách $k$</th>
+                <th>Phương Pháp</th>
+                <th>Overall Coverage (Bảo Toàn Đỉnh)</th>
+                <th>Rare Rep Rate (Đột Phá Nhóm Hiếm)</th>
+                <th>Worst-Group Coverage (Cận Dưới)</th>
+                <th>1-NN Macro-F1 (Gán Nhãn Hạ Nguồn)</th>
+                <th>Đánh Giá Khoa Học</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td rowspan="2"><strong>$k = 50$</strong></td>
+                <td><strong>RareProtSelect (WFL)</strong></td>
+                <td>0.9884</td>
+                <td class="highlight-win">10.7% (3/28)</td>
+                <td class="highlight-win">0.9770</td>
+                <td class="highlight-win">0.0998 (+25.2%)</td>
+                <td class="highlight-win">Bắt đầu đón được phân họ hiếm</td>
+              </tr>
+              <tr>
+                <td>Bài báo nền (Unweighted FL)</td>
+                <td>0.9890</td>
+                <td>0.0% (0/28)</td>
+                <td>0.9735</td>
+                <td>0.0797</td>
+                <td>Bỏ rơi 100% nhóm hiếm</td>
+              </tr>
+              <tr>
+                <td rowspan="2"><strong>$k = 100$</strong></td>
+                <td><strong>RareProtSelect (WFL)</strong></td>
+                <td>0.9897</td>
+                <td class="highlight-win">53.6% (15/28)</td>
+                <td class="highlight-win">0.9816</td>
+                <td class="highlight-win">0.1915 (+70.4%)</td>
+                <td class="highlight-win">Đột phá vượt trội toàn diện</td>
+              </tr>
+              <tr>
+                <td>Bài báo nền (Unweighted FL)</td>
+                <td>0.9907</td>
+                <td>0.0% (0/28)</td>
+                <td>0.9760</td>
+                <td>0.1124</td>
+                <td>Vẫn bỏ rơi 28/28 phân họ hiếm</td>
+              </tr>
+              <tr>
+                <td rowspan="2"><strong>$k = 200$</strong></td>
+                <td><strong>RareProtSelect (WFL)</strong></td>
+                <td>0.9911</td>
+                <td class="highlight-win">82.1% (23/28)</td>
+                <td class="highlight-win">0.9899</td>
+                <td class="highlight-win">0.2704 (+59.9%)</td>
+                <td class="highlight-win">Bảo toàn 23 phân họ quý hiếm</td>
+              </tr>
+              <tr>
+                <td>Bài báo nền (Unweighted FL)</td>
+                <td>0.9921</td>
+                <td>0.0% (0/28)</td>
+                <td>0.9803</td>
+                <td>0.1691</td>
+                <td>0% đại diện nhóm hiếm</td>
+              </tr>
+              <tr>
+                <td rowspan="2"><strong>$k = 400$</strong></td>
+                <td><strong>RareProtSelect (WFL)</strong></td>
+                <td>0.9924</td>
+                <td class="highlight-win">100.0% (28/28)</td>
+                <td class="highlight-win">0.9911</td>
+                <td class="highlight-win">0.3557 (+75.9%)</td>
+                <td class="highlight-win">Bao phủ tuyệt đối mọi phân họ</td>
+              </tr>
+              <tr>
+                <td>Bài báo nền (Unweighted FL)</td>
+                <td>0.9933</td>
+                <td>3.6% (1/28)</td>
+                <td>0.9803</td>
+                <td>0.2022</td>
+                <td>Chỉ chọn được 1 phân họ hiếm</td>
+              </tr>
+              <tr>
+                <td rowspan="2"><strong>$k = 600$</strong></td>
+                <td><strong>RareProtSelect (WFL)</strong></td>
+                <td>0.9931</td>
+                <td class="highlight-win">100.0% (28/28)</td>
+                <td class="highlight-win">0.9918</td>
+                <td class="highlight-win">0.3721 (+55.0%)</td>
+                <td class="highlight-win">Bảo vệ vững chắc đáy F1</td>
+              </tr>
+              <tr>
+                <td>Bài báo nền (Unweighted FL)</td>
+                <td>0.9941</td>
+                <td>10.7% (3/28)</td>
+                <td>0.9816</td>
+                <td>0.2400</td>
+                <td>Vẫn mất 25 phân họ hiếm</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Ablation & Scalability Tables Grid -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Bóc Tách Toán Học: Siêu Tham Số $\alpha$ ($w_v = 1/n_g^\alpha$)</h3>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Cơ Chế Trọng Số</th>
+                  <th>Coverage ($k=100$)</th>
+                  <th>Rare Rep ($k=100$)</th>
+                  <th>Macro-F1</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>$\alpha = 0.0$ (Bài báo nền)</td>
+                  <td>0.9907</td>
+                  <td>0.0%</td>
+                  <td>0.1124</td>
+                </tr>
+                <tr>
+                  <td>$\alpha = 0.25$ (Power Weak)</td>
+                  <td>0.9906</td>
+                  <td>7.1%</td>
+                  <td>0.1465</td>
+                </tr>
+                <tr style="background:rgba(56, 189, 248, 0.1);">
+                  <td><strong>$\alpha = 0.50$ (RareProtSelect)</strong></td>
+                  <td><strong>0.9897</strong></td>
+                  <td class="highlight-win"><strong>53.6%</strong></td>
+                  <td class="highlight-win"><strong>0.1915</strong></td>
+                </tr>
+                <tr>
+                  <td>$\alpha = 0.75$ (Power Strong)</td>
+                  <td>0.9884</td>
+                  <td>82.1%</td>
+                  <td>0.2183</td>
+                </tr>
+                <tr>
+                  <td>$\alpha = 1.00$ (Inverse Freq)</td>
+                  <td>0.9861</td>
+                  <td>96.4%</td>
+                  <td>0.1745</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="font-size:0.82rem; color:var(--text-muted); margin-top:4px;">
+            🎯 <strong>Kết luận:</strong> $\alpha = 0.5$ ($w_v = 1/\sqrt{n_g}$) là <strong>điểm cân bằng Pareto Vàng</strong>: vừa nâng Rare Rep lên 53.6%, vừa giữ vững Overall Coverage (>98.9%).
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Đo Lường Hiệu Năng: Lazy Greedy vs. Standard Greedy</h3>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Ngân sách $k$</th>
+                  <th>Lazy Greedy</th>
+                  <th>Standard Greedy</th>
+                  <th>Hệ số Tăng Tốc</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>$k = 10$</td>
+                  <td>7.41s</td>
+                  <td>21.53s</td>
+                  <td><strong>$2.91\times$</strong></td>
+                </tr>
+                <tr>
+                  <td>$k = 50$</td>
+                  <td>11.04s</td>
+                  <td>106.55s</td>
+                  <td><strong>$9.65\times$</strong></td>
+                </tr>
+                <tr>
+                  <td>$k = 100$</td>
+                  <td>12.48s</td>
+                  <td>213.10s</td>
+                  <td><strong>$17.08\times$</strong></td>
+                </tr>
+                <tr>
+                  <td>$k = 200$</td>
+                  <td>14.28s</td>
+                  <td>426.19s</td>
+                  <td><strong>$29.84\times$</strong></td>
+                </tr>
+                <tr style="background:rgba(16, 185, 129, 0.1);">
+                  <td><strong>$k = 500$</strong></td>
+                  <td><strong>16.44s</strong></td>
+                  <td><strong>1,065.49s (17.8m)</strong></td>
+                  <td class="highlight-win"><strong>$64.81\times$</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="font-size:0.82rem; color:var(--text-muted); margin-top:4px;">
+            ⚡ <strong>Kiểm chứng tính đúng đắn:</strong> Test `test_lazy_vs_standard_greedy.py` chứng minh $S_{\text{lazy}} \equiv S_{\text{std}}$ và $F(S_{\text{lazy}}) == F(S_{\text{std}})$ chính xác $100\%$.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    function switchTab(tabId, ev) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+
+      if (ev && ev.currentTarget) {
+        ev.currentTarget.classList.add('active');
+      }
+      const targetPanel = document.getElementById(tabId);
+      if (targetPanel) {
+        targetPanel.classList.add('active');
+      }
+    }
+
+    function toggleAccordion(header) {
+      const item = header.parentElement;
+      item.classList.toggle('active');
+    }
+
+    function toggleTree(folderElement) {
+      const children = folderElement.nextElementSibling;
+      if (children && children.classList.contains('tree-children')) {
+        children.classList.toggle('collapsed');
+        const icon = folderElement.querySelector('span');
+        if (icon) {
+          icon.textContent = children.classList.contains('collapsed') ? '📁' : '📂';
+        }
+      }
+    }
+
+    // Search filter
+    document.getElementById('filterInput').addEventListener('input', function(e) {
+      const q = e.target.value.toLowerCase();
+      document.querySelectorAll('.card, .accordion-item, .step-box, .erd-card').forEach(el => {
+        const text = el.innerText.toLowerCase();
+        if (text.includes(q)) {
+          el.style.display = '';
+        } else {
+          el.style.display = 'none';
+        }
+      });
+    });
+
+    // Initialize KaTeX Auto-render
+    document.addEventListener("DOMContentLoaded", function() {
+      if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(document.body, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false},
+            {left: '\\(', right: '\\)', display: false},
+            {left: '\\[', right: '\\]', display: true}
+          ],
+          throwOnError: false
+        });
+      }
+    });
+  </script>
+</body>
+</html>

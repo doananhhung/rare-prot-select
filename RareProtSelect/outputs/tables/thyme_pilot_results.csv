@@ -1,0 +1,15 @@
+dataset,method,budget_k,overall_coverage,macro_coverage,worst_group_coverage,rare_representation_rate,pairwise_redundancy,transfer_accuracy,transfer_macro_f1,benchmark_overlap_count,benchmark_exact_recall,benchmark_f1,benchmark_semantic_coverage,runtime_seconds,peak_ram_mb
+Thioesterases,RareProtSelect (WFL),5,0.9295,0.931,0.7667,0.0084,0.8315,0.0083,0.0001,2,0.0054,0.0106,0.9311,0.0149,0.05
+Thioesterases,"Unweighted FL (Nguyen et al., 2025)",5,0.93,0.9299,0.7667,0.0112,0.8141,0.0067,0.0003,2,0.0054,0.0106,0.9299,0.0184,0.12
+Thioesterases,RareProtSelect (WFL),10,0.9473,0.949,0.791,0.0225,0.8415,0.0168,0.001,4,0.0108,0.0209,0.9491,0.0244,0.13
+Thioesterases,"Unweighted FL (Nguyen et al., 2025)",10,0.9476,0.9466,0.792,0.0253,0.8294,0.0202,0.0017,4,0.0108,0.0209,0.9468,0.0232,0.14
+Thioesterases,RareProtSelect (WFL),15,0.958,0.9582,0.7989,0.0337,0.8163,0.0271,0.0031,7,0.0188,0.0362,0.9584,0.0273,0.16
+Thioesterases,"Unweighted FL (Nguyen et al., 2025)",15,0.9576,0.9551,0.7989,0.0393,0.8008,0.0322,0.0048,7,0.0188,0.0362,0.9554,0.0284,0.13
+Thioesterases,RareProtSelect (WFL),20,0.9655,0.9643,0.7989,0.0421,0.8116,0.0462,0.0061,9,0.0242,0.0459,0.9645,0.03,0.14
+Thioesterases,"Unweighted FL (Nguyen et al., 2025)",20,0.9648,0.9611,0.7989,0.0449,0.8104,0.0598,0.0082,8,0.0215,0.0408,0.9613,0.0302,0.15
+Thioesterases,RareProtSelect (WFL),27,0.9706,0.9699,0.8303,0.059,0.8132,0.0554,0.0082,13,0.0349,0.0652,0.97,0.0316,0.16
+Thioesterases,"Unweighted FL (Nguyen et al., 2025)",27,0.9704,0.9677,0.8303,0.0618,0.8167,0.0761,0.0113,11,0.0296,0.0551,0.9675,0.0317,0.18
+Thioesterases,RareProtSelect (WFL),30,0.9723,0.9716,0.8303,0.0646,0.8179,0.0643,0.0098,14,0.0376,0.0697,0.9716,0.0346,0.19
+Thioesterases,"Unweighted FL (Nguyen et al., 2025)",30,0.9722,0.9695,0.8303,0.0674,0.8218,0.0817,0.0122,12,0.0323,0.0597,0.9694,0.0346,0.2
+Thioesterases,RareProtSelect (WFL),50,0.9794,0.9784,0.921,0.1096,0.8072,0.1153,0.02,29,0.078,0.1374,0.9784,0.041,0.22
+Thioesterases,"Unweighted FL (Nguyen et al., 2025)",50,0.98,0.977,0.8908,0.1096,0.8162,0.1387,0.027,21,0.0565,0.0995,0.9771,0.0408,0.16

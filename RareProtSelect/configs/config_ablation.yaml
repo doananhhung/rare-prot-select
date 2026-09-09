@@ -1,0 +1,21 @@
+﻿# Configuration for Ablation Study Experiment
+dataset_name: "MEROPS_A1A"
+fasta_path: "../baseline_repo/MEROPS_A1A.fasta"
+benchmark_gold_path: null
+model_name: "facebook/esm2_t12_35M_UR50D"
+device: "cuda"
+batch_size: 64
+budget_k_list: [10, 20, 50, 100, 200]
+weighting_scheme: "inverse_sqrt"
+weighting_alpha: 0.5
+rare_threshold: 5
+min_seq_len: 30
+max_seq_len: 2000
+max_ambiguous_ratio: 0.05
+output_dir: "outputs"
+cache_dir: "outputs/embeddings_cache"
+seed: 42
+weighting_schemes: ["uniform", "inverse_sqrt", "inverse_freq", "power"]
+alpha_values: [0.25, 0.5, 0.75, 1.0]
+model_variants: ["facebook/esm2_t6_8M_UR50D", "facebook/esm2_t12_35M_UR50D"]
+knn_k_values: [10, 20, 50]

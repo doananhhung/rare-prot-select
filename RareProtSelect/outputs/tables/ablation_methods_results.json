@@ -1,0 +1,252 @@
+[
+  {
+    "method": "RareProtSelect (Lazy WFL)",
+    "budget_k": 10,
+    "worst_group_coverage": 0.9618,
+    "macro_coverage": 0.9842,
+    "overall_coverage": 0.983,
+    "rare_representation_rate": 0.0,
+    "pairwise_redundancy": 0.9587,
+    "transfer_macro_f1": 0.0176
+  },
+  {
+    "method": "Unweighted FL (Nguyen et al., 2025)",
+    "budget_k": 10,
+    "worst_group_coverage": 0.9636,
+    "macro_coverage": 0.9828,
+    "overall_coverage": 0.9834,
+    "rare_representation_rate": 0.0,
+    "pairwise_redundancy": 0.9644,
+    "transfer_macro_f1": 0.0134
+  },
+  {
+    "method": "Random Selection",
+    "budget_k": 10,
+    "worst_group_coverage": 0.9641,
+    "macro_coverage": 0.9797,
+    "overall_coverage": 0.9791,
+    "rare_representation_rate": 0.0,
+    "pairwise_redundancy": 0.9435,
+    "transfer_macro_f1": 0.0132
+  },
+  {
+    "method": "Farthest First",
+    "budget_k": 10,
+    "worst_group_coverage": 0.881,
+    "macro_coverage": 0.9176,
+    "overall_coverage": 0.9169,
+    "rare_representation_rate": 0.0,
+    "pairwise_redundancy": 0.7252,
+    "transfer_macro_f1": 0.0115
+  },
+  {
+    "method": "K-Medoids (PAM)",
+    "budget_k": 10,
+    "worst_group_coverage": 0.9656,
+    "macro_coverage": 0.9825,
+    "overall_coverage": 0.983,
+    "rare_representation_rate": 0.0,
+    "pairwise_redundancy": 0.8994,
+    "transfer_macro_f1": 0.0142
+  },
+  {
+    "method": "RareProtSelect (Lazy WFL)",
+    "budget_k": 20,
+    "worst_group_coverage": 0.9753,
+    "macro_coverage": 0.9879,
+    "overall_coverage": 0.985,
+    "rare_representation_rate": 0.0357,
+    "pairwise_redundancy": 0.9568,
+    "transfer_macro_f1": 0.0325
+  },
+  {
+    "method": "Unweighted FL (Nguyen et al., 2025)",
+    "budget_k": 20,
+    "worst_group_coverage": 0.9733,
+    "macro_coverage": 0.9856,
+    "overall_coverage": 0.9862,
+    "rare_representation_rate": 0.0,
+    "pairwise_redundancy": 0.9555,
+    "transfer_macro_f1": 0.0257
+  },
+  {
+    "method": "Random Selection",
+    "budget_k": 20,
+    "worst_group_coverage": 0.9658,
+    "macro_coverage": 0.983,
+    "overall_coverage": 0.9826,
+    "rare_representation_rate": 0.0,
+    "pairwise_redundancy": 0.9559,
+    "transfer_macro_f1": 0.0192
+  },
+  {
+    "method": "Farthest First",
+    "budget_k": 20,
+    "worst_group_coverage": 0.9089,
+    "macro_coverage": 0.9465,
+    "overall_coverage": 0.9412,
+    "rare_representation_rate": 0.0357,
+    "pairwise_redundancy": 0.7613,
+    "transfer_macro_f1": 0.0077
+  },
+  {
+    "method": "K-Medoids (PAM)",
+    "budget_k": 20,
+    "worst_group_coverage": 0.9661,
+    "macro_coverage": 0.9854,
+    "overall_coverage": 0.9857,
+    "rare_representation_rate": 0.0,
+    "pairwise_redundancy": 0.9328,
+    "transfer_macro_f1": 0.024
+  },
+  {
+    "method": "RareProtSelect (Lazy WFL)",
+    "budget_k": 50,
+    "worst_group_coverage": 0.977,
+    "macro_coverage": 0.9905,
+    "overall_coverage": 0.9884,
+    "rare_representation_rate": 0.1071,
+    "pairwise_redundancy": 0.9546,
+    "transfer_macro_f1": 0.0998
+  },
+  {
+    "method": "Unweighted FL (Nguyen et al., 2025)",
+    "budget_k": 50,
+    "worst_group_coverage": 0.9735,
+    "macro_coverage": 0.9879,
+    "overall_coverage": 0.989,
+    "rare_representation_rate": 0.0,
+    "pairwise_redundancy": 0.9487,
+    "transfer_macro_f1": 0.0797
+  },
+  {
+    "method": "Random Selection",
+    "budget_k": 50,
+    "worst_group_coverage": 0.9694,
+    "macro_coverage": 0.9858,
+    "overall_coverage": 0.9858,
+    "rare_representation_rate": 0.0,
+    "pairwise_redundancy": 0.9449,
+    "transfer_macro_f1": 0.042
+  },
+  {
+    "method": "Farthest First",
+    "budget_k": 50,
+    "worst_group_coverage": 0.9576,
+    "macro_coverage": 0.9676,
+    "overall_coverage": 0.968,
+    "rare_representation_rate": 0.0357,
+    "pairwise_redundancy": 0.8205,
+    "transfer_macro_f1": 0.017
+  },
+  {
+    "method": "K-Medoids (PAM)",
+    "budget_k": 50,
+    "worst_group_coverage": 0.9744,
+    "macro_coverage": 0.9879,
+    "overall_coverage": 0.9883,
+    "rare_representation_rate": 0.0357,
+    "pairwise_redundancy": 0.9424,
+    "transfer_macro_f1": 0.0747
+  },
+  {
+    "method": "RareProtSelect (Lazy WFL)",
+    "budget_k": 100,
+    "worst_group_coverage": 0.9816,
+    "macro_coverage": 0.9937,
+    "overall_coverage": 0.9897,
+    "rare_representation_rate": 0.5357,
+    "pairwise_redundancy": 0.9487,
+    "transfer_macro_f1": 0.1915
+  },
+  {
+    "method": "Unweighted FL (Nguyen et al., 2025)",
+    "budget_k": 100,
+    "worst_group_coverage": 0.976,
+    "macro_coverage": 0.9899,
+    "overall_coverage": 0.9907,
+    "rare_representation_rate": 0.0,
+    "pairwise_redundancy": 0.9413,
+    "transfer_macro_f1": 0.1124
+  },
+  {
+    "method": "Random Selection",
+    "budget_k": 100,
+    "worst_group_coverage": 0.9715,
+    "macro_coverage": 0.9879,
+    "overall_coverage": 0.9879,
+    "rare_representation_rate": 0.0,
+    "pairwise_redundancy": 0.9455,
+    "transfer_macro_f1": 0.089
+  },
+  {
+    "method": "Farthest First",
+    "budget_k": 100,
+    "worst_group_coverage": 0.9675,
+    "macro_coverage": 0.9763,
+    "overall_coverage": 0.976,
+    "rare_representation_rate": 0.1071,
+    "pairwise_redundancy": 0.8518,
+    "transfer_macro_f1": 0.0258
+  },
+  {
+    "method": "K-Medoids (PAM)",
+    "budget_k": 100,
+    "worst_group_coverage": 0.9744,
+    "macro_coverage": 0.9888,
+    "overall_coverage": 0.9897,
+    "rare_representation_rate": 0.0,
+    "pairwise_redundancy": 0.9422,
+    "transfer_macro_f1": 0.0942
+  },
+  {
+    "method": "RareProtSelect (Lazy WFL)",
+    "budget_k": 200,
+    "worst_group_coverage": 0.9899,
+    "macro_coverage": 0.9958,
+    "overall_coverage": 0.9911,
+    "rare_representation_rate": 0.8214,
+    "pairwise_redundancy": 0.9464,
+    "transfer_macro_f1": 0.2704
+  },
+  {
+    "method": "Unweighted FL (Nguyen et al., 2025)",
+    "budget_k": 200,
+    "worst_group_coverage": 0.9803,
+    "macro_coverage": 0.9911,
+    "overall_coverage": 0.9921,
+    "rare_representation_rate": 0.0,
+    "pairwise_redundancy": 0.9343,
+    "transfer_macro_f1": 0.1691
+  },
+  {
+    "method": "Random Selection",
+    "budget_k": 200,
+    "worst_group_coverage": 0.976,
+    "macro_coverage": 0.9892,
+    "overall_coverage": 0.9897,
+    "rare_representation_rate": 0.0,
+    "pairwise_redundancy": 0.9448,
+    "transfer_macro_f1": 0.1188
+  },
+  {
+    "method": "Farthest First",
+    "budget_k": 200,
+    "worst_group_coverage": 0.9709,
+    "macro_coverage": 0.9813,
+    "overall_coverage": 0.9817,
+    "rare_representation_rate": 0.1071,
+    "pairwise_redundancy": 0.8775,
+    "transfer_macro_f1": 0.0481
+  },
+  {
+    "method": "K-Medoids (PAM)",
+    "budget_k": 200,
+    "worst_group_coverage": 0.9744,
+    "macro_coverage": 0.9904,
+    "overall_coverage": 0.9911,
+    "rare_representation_rate": 0.0714,
+    "pairwise_redundancy": 0.9401,
+    "transfer_macro_f1": 0.1265
+  }
+]
