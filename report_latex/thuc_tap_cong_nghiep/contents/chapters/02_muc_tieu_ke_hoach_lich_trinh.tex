@@ -1,0 +1,80 @@
+\chapter{MỤC TIÊU, KẾ HOẠCH VÀ LỊCH TRÌNH}
+\label{chap:ke_hoach_lich_trinh}
+
+Việc xác định mục tiêu rõ ràng và thiết lập kế hoạch làm việc tuần tự đóng vai trò tiên quyết nhằm bảo đảm tiến độ nghiên cứu và chất lượng sản phẩm bàn giao tại ORLab. Trong chương này, các mục tiêu thực tập, bảng phân bổ công việc theo giai đoạn và lịch trình triển khai chi tiết theo tuần được trình bày cụ thể.
+
+\section{Mục tiêu thực tập}
+\label{sec:muc_tieu_thuc_tap}
+
+Quá trình thực tập tại phòng thí nghiệm ORLab được thiết kế nhằm hoàn thiện đồng thời hai nhóm mục tiêu cốt~lõi:
+
+\subsection{Mục tiêu cá nhân}
+\begin{itemize}[noitemsep,topsep=2pt]
+    \item Thích nghi với quy trình làm việc học thuật chuyên nghiệp, phương pháp tư duy nghiên cứu khoa học độc lập và tác phong kỷ luật của một phòng thí nghiệm nghiên cứu hiện đại.
+    \item Nâng cao năng lực giải quyết các bài toán tối ưu NP-khó trong thực tiễn thông qua việc xây dựng mô hình toán học giải tích chặt chẽ.
+    \item Hoàn thành xuất sắc học phần thực tập công nghiệp với báo cáo kỹ thuật và nghiệm thu thực nghiệm đầy đủ.
+\end{itemize}
+
+\subsection{Mục tiêu nghề nghiệp}
+\begin{itemize}[noitemsep,topsep=2pt]
+    \item Làm chủ kỹ năng phát triển phần mềm nghiên cứu khoa học Research Software Engineering với công cụ quản lý môi trường hiện đại uv và ngôn ngữ Python 3.12.
+    \item Tích lũy kinh nghiệm xử lý dữ liệu lớn trong tin sinh học phân tử, bao gồm cấu trúc tệp FASTA, chuẩn hóa mã phân loại MEROPS và trích xuất vector đặc trưng từ mô hình ngôn ngữ protein ESM-2.
+    \item Định hướng phát triển sự nghiệp theo con đường kỹ sư nghiên cứu trí tuệ nhân tạo và giải thuật tối ưu.
+\end{itemize}
+
+\clearpage
+\section{Kế hoạch thực tập tại cơ sở}
+\label{sec:ke_hoach_thuc_tap}
+
+\subsection{Nội dung công việc được giao}
+Tại ORLab, tôi được giao nghiên cứu đề tài \textbf{``Chọn tập protein đại diện có ưu tiên nhóm hiếm bằng tối ưu hóa submodular mang tên RareProtSelect''}, với 4 nhiệm vụ cốt lõi:
+\begin{enumerate}
+    \item Nghiên cứu bài báo nền tảng về lựa chọn chuỗi protein đại diện bằng hàm submodular Facility Location và chỉ ra hạn chế của phương pháp hiện có đối với phân bố mất cân bằng quy mô nhóm.
+    \item Đề xuất mô hình toán học mới tích hợp hàm trọng số phạt quy mô nhóm và kết hợp không gian tương đồng BLASTp với vector nhúng ngữ nghĩa ESM-2.
+    \item Thiết kế và cài đặt pipeline tính toán hoàn chỉnh, bao gồm thuật toán tham lam cắt tỉa Pruned Greedy 90\% tăng tốc trên GPU và cơ chế tổng hợp thứ~hạng~toàn~cục.
+    \item Đo đạc thực nghiệm định lượng trên tập dữ liệu chuẩn MEROPS A1A với 115 Subfamily chính thức qua 6 kịch bản thử nghiệm đối chuẩn chặt chẽ.
+\end{enumerate}
+
+\subsection{Kế hoạch thực hiện theo giai đoạn}
+Toàn bộ quá trình thực tập kéo dài 3 tuần (từ ngày 26/10/2026 đến ngày 15/11/2026) được chia thành 3 giai đoạn trọng tâm như thể hiện trong bảng~\ref{tab:ke_hoach_giai_doan}.
+
+\begin{table}[htbp!]
+    \centering
+    \caption{Kế hoạch thực tập tại cơ sở ORLab phân chia theo giai đoạn.}
+    \label{tab:ke_hoach_giai_doan}
+    \vspace{2pt}
+    \begin{tabularx}{\textwidth}{c c c Y}
+        \toprule
+        \textbf{Giai đoạn} & \textbf{Tiến độ} & \textbf{Khung thời gian} & \textbf{Nội dung công việc trọng tâm} \\
+        \midrule
+        1 & Tuần 1 & 26/10 - 01/11 & Khảo sát bài báo nền tảng, thiết lập môi trường uv trên Python 3.12, tiền xử lý và chuẩn hóa $4.120$ chuỗi dữ liệu MEROPS A1A. \\
+        2 & Tuần 2 & 02/11 - 08/11 & Xây dựng mô hình toán RareProtSelect có trọng số phạt quy mô nhóm, giải thuật Pruned Greedy 90\% trên GPU, trích xuất embedding ESM-2-35M kết hợp dịch tâm Mean-Centering chống co cụm vector. \\
+        3 & Tuần 3 & 09/11 - 15/11 & Thiết kế cơ chế tổng hợp thứ hạng toàn cục, chỉ số Within-Subfamily Coverage, chạy toàn diện 6 kịch bản đối chuẩn và hoàn thiện toàn bộ báo cáo kết quả. \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
+
+Kế hoạch 3 giai đoạn trên bảo đảm tính tuần tự và cô lập biến số thực nghiệm, tạo cơ sở vững chắc cho các kết quả đối chuẩn tin cậy.
+
+\section{Lịch trình chi tiết theo tuần}
+\label{sec:lich_trinh_chi_tiet}
+
+Tôi tuân thủ quy chế thực tập tập trung tại phòng thí nghiệm ORLab với thời lượng làm việc từ Thứ Hai đến Thứ Sáu hằng tuần. Lịch trình công việc chi tiết và kết quả đạt được cụ thể qua từng tuần được trình bày trong bảng~\ref{tab:lich_trinh_tuan}.
+
+\begin{table}[htbp!]
+    \centering
+    \caption{Lịch trình thực tập chi tiết theo từng tuần tại phòng thí nghiệm ORLab.}
+    \label{tab:lich_trinh_tuan}
+    \vspace{2pt}
+    \begin{tabularx}{\textwidth}{c L{1.8cm} Y Y}
+        \toprule
+        \textbf{STT} & \textbf{Thời gian} & \textbf{Nội dung công việc} & \textbf{Kết quả đạt được} \\
+        \midrule
+        1 & Tuần 1 & Đọc hiểu tài liệu bài báo nền tảng, khảo sát cơ sở dữ liệu MEROPS, tiền xử lý và kiểm soát chất lượng tập $V_{\text{curated}}$ gồm $4.120$ chuỗi, phân tích phân bố quy mô 115 phân họ và cài đặt môi trường tính toán uv. & Báo cáo tổng quan lý thuyết, cấu hình môi trường Python 3.12 và PyTorch CUDA 13.0, tập dữ liệu phân họ chính thức chuẩn hóa và ma trận tương đồng BLASTp nguyên bản. \\
+        2 & Tuần 2 & Xây dựng mô hình toán học submodular có trọng số phạt quy mô nhóm RareProtSelect, lập trình giải thuật Pruned Greedy 90\% tăng tốc trên GPU PyTorch CUDA, trích xuất vector nhúng ngữ nghĩa PLM ESM-2-35M và khử co cụm Anisotropy. & Module tối ưu hóa lõi RareProtSelect, giải thuật cắt tỉa cứng $\theta = 0{,}90$ trên GPU, ma trận tương đồng cosine Mean-Centering $\mathbf{S}_{\text{ESM}}^{(\beta)}$ kết hợp hai không gian biểu diễn. \\
+        3 & Tuần 3 & Thiết kế cơ chế tổng hợp thứ hạng toàn cục $S_{\text{aggregate}}$, xây dựng chỉ số bao phủ nội phân họ Within-Subfamily Coverage, thực thi toàn diện 6 kịch bản đối chuẩn, đo đạc dữ liệu định lượng 100\% nguyên văn và hoàn thiện báo cáo. & Pipeline đánh giá hoàn chỉnh, 6 tệp kết quả CSV thực nghiệm, hệ thống biểu đồ tương quan đánh đổi Pareto độ phân giải cao và báo cáo thực tập công nghiệp hoàn chỉnh được nghiệm thu. \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
+
+Bảng lịch trình chi tiết tại bảng~\ref{tab:lich_trinh_tuan} cho thấy sự tuân thủ nghiêm ngặt tiến độ khoa học đã cam kết với đơn vị thực tập, bảo đảm mỗi tuần đều hoàn thành đầy đủ sản phẩm đầu ra có thể kiểm chứng được.

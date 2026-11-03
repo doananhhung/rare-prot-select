@@ -5,9 +5,13 @@ from __future__ import annotations
 import functools
 import logging
 import time
-from typing import Any, Callable
+from types import TracebackType
+from typing import Callable, ParamSpec, TypeVar
 
 logger = logging.getLogger(__name__)
+
+P = ParamSpec("P")
+R = TypeVar("R")
 
 
 class Timer:
@@ -55,7 +59,12 @@ class Timer:
         self.start()
         return self
 
-    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         self.stop()
 
 
@@ -63,13 +72,13 @@ class Timer:
 ExecutionTimer = Timer
 
 
-def timeit(name: str | None = None, auto_log: bool = True) -> Callable:
+def timeit(name: str | None = None, auto_log: bool = True) -> Callable[[Callable[P, R]], Callable[P, R]]:
     """Decorator đo thời gian chạy của hàm."""
-    def decorator(func: Callable) -> Callable:
+    def decorator(func: Callable[P, R]) -> Callable[P, R]:
         func_name = name or func.__name__
 
         @functools.wraps(func)
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
             timer = Timer(name=func_name, auto_log=auto_log)
             with timer:
                 result = func(*args, **kwargs)

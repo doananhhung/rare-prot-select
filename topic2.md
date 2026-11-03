@@ -163,13 +163,15 @@ Phần lý thuyết tối thiểu:
 - phân tích độ phức tạp khi dùng ma trận similarity đầy đủ;
 - đề xuất và đánh giá biến thể sparse-kNN để mở rộng quy mô.
 
-### 3.2. Câu hỏi nghiên cứu
+### 3.2. Câu hỏi nghiên cứu (Research Questions)
 
-- RQ1: PLM similarity có tạo tập đại diện tốt hơn sequence identity?
-- RQ2: Rare-aware weighting có cải thiện macro và worst-group coverage?
-- RQ3: Cải thiện nhóm hiếm có làm giảm overall coverage hoặc tăng redundancy?
-- RQ4: Tập đại diện có cải thiện annotation transfer cho sequence hiếm?
-- RQ5: Kết quả có ổn định qua PLM size, ngân sách (k) và cách định nghĩa nhóm?
+Chuỗi 5 Câu hỏi Nghiên cứu được chuẩn hóa theo nguyên tắc cô lập biến số (*Ceteris Paribus*) và chuỗi nhân quả kế thừa tuần tự ($RQ_1 \to RQ_5$):
+
+- **$RQ_1$ (Baseline Flaw & Phantom Coverage):** *Khi tái hiện phương pháp Unweighted Submodular Facility Location của bài báo nền (Nguyen et al., 2025) trên siêu họ Peptidase A1, hiện tượng "đánh giá chéo phân họ" (cross-subfamily hits) ảnh hưởng như thế nào đến độ phủ thực sự của các phân họ hiếm?* (Tương ứng Nhánh 1 vs Nhánh 2 $\alpha=0.0$).
+- **$RQ_2$ (Rare-Aware Weighting on BLASTp):** *Việc đưa hàm trọng số nghịch đảo quy mô phân họ $w_v = (n_g)^{-\alpha}$ vào hàm mục tiêu Facility Location trên ma trận BLASTp có thể giải quyết được sự thiên vị nhóm lớn và phục hồi độ phủ nội phân họ cho nhóm hiếm hay không, và sự đánh đổi (trade-off) với độ phủ toàn cục diễn ra như thế nào?* (Tương ứng Nhánh 2, $\alpha \in \{0.0, 0.5, 1.0\}$).
+- **$RQ_3$ (Continuous Semantic Representation):** *Không gian biểu diễn ngữ nghĩa liên tục từ mô hình ngôn ngữ protein ESM-2 (sau khi khử suy biến dị hướng $\beta=0.70$) đem lại lợi thế gì so với ma trận căn chỉnh cục bộ rời rạc BLASTp trong việc duy trì độ bao phủ nội phân họ cho các nhóm hiếm?* (Tương ứng Nhánh 3).
+- **$RQ_4$ (Cross-Space Evaluation Robustness):** *Khi thực hiện kiểm tra chéo hai chiều ($2 \times 2$ Cross-Space Evaluation), tập đại diện chọn trong không gian ngữ nghĩa ESM-2 có duy trì được độ nhạy trên mặt trận Live BLASTp truyền thống hay không, và ngược lại?* (Tương ứng Nhánh 4).
+- **$RQ_5$ (Allocation Structure & Anti-Monopoly):** *Về mặt cấu trúc phân bổ đại diện trực tiếp trong $S_k$: Thuật toán đề xuất có thực sự tước bỏ sự thâu tóm ghế đại diện của phân họ lớn nhất A01.009 để phân bổ công bằng cho 45 phân họ hiếm hay không, và tỷ lệ dư thừa phân họ (redundancy %) biến thiên như thế nào theo ngân sách $k$?* (Tương ứng Nhánh 5).
 
 ### 3.3. Dữ liệu và thực nghiệm
 

@@ -1,0 +1,157 @@
+\chapter{Tổng quan và cơ sở lý thuyết}
+\label{chap:theory}
+
+Chương này thiết lập cơ sở lý thuyết nền tảng cho toàn bộ đồ án thông qua bốn nội dung khoa học liên ngành trọng tâm: (1) đặc điểm sinh học và cấu trúc dữ liệu của siêu họ enzyme Peptidase A1 trong cơ sở dữ liệu MEROPS; (2) tổng quan các phương pháp chọn tập protein đại diện hiện có cùng việc phân tích các điểm mù phương pháp luận của nghiên cứu nền tảng; (3) cơ sở lý thuyết toán học về tối ưu hóa tổ hợp submodular và bảo đảm cận xấp xỉ của giải thuật tham lam; và (4) nguyên lý biểu diễn phân tử bằng mô hình ngôn ngữ protein tiền huấn luyện ESM-2 cùng hiện tượng co cụm vector trong không gian tương đồng liên tục.
+
+\section{Siêu họ Peptidase A1 và cơ sở dữ liệu MEROPS}
+\label{sec:theory_merops_a1a}
+
+Peptidase là nhóm enzyme xúc tác quá trình thủy phân liên kết peptide, đóng vai trò điều hòa quan trọng trong đa số các quá trình sinh lý của tế bào sống. Trong các lớp peptidase đã biết, lớp peptidase aspartic, điển hình là siêu họ Peptidase A1, đại diện cho nhóm enzyme có ý nghĩa sinh học và giá trị ứng dụng y dược học cao.
+
+\subsection{Đặc điểm enzyme học và ý nghĩa đối chuẩn của Peptidase A1}
+\label{subsec:aspartic_peptidase}
+
+Peptidase A1 là siêu họ enzyme phân giải protein điển hình thuộc lớp aspartic peptidase, đặc trưng bởi tâm xúc tác bảo tồn hai gốc axit aspartic và hoạt tính tối ưu trong môi trường pH axit. Bao gồm nhiều enzyme y sinh học quan trọng như pepsin, renin hay cathepsin D, Peptidase A1 sở hữu độ đa dạng chuỗi phong phú và hệ thống phân loại tiến hóa được kiểm chứng thực nghiệm chặt chẽ. Đặc tính này giúp Peptidase A1 trở thành hệ thống dữ liệu đối chuẩn tiêu biểu trong nghiên cứu nền tảng của Nguyen và cộng sự~\cite{nguyen2025} để đánh giá các thuật toán chọn tập protein đại diện.
+
+\subsection{Cấu trúc cơ sở dữ liệu MEROPS và phân loại Subfamily trong Family A1}
+\label{subsec:merops_database}
+
+Cơ sở dữ liệu MEROPS~\cite{merops} phân loại peptidase theo hệ thống phân cấp chuẩn hóa gồm Clan, Family, Subfamily và Peptidase ID, trong đó Family A1 thuộc Clan AA tập hợp $115$ Subfamily chính thức. Trong tệp dữ liệu MEROPS\_A1A.fasta gồm $13.847$ chuỗi ban đầu, sau bước lọc kiểm soát chất lượng thu được $13.307$ chuỗi hợp lệ, trong đó nhóm chuỗi môi trường chưa được phân loại [A01.UPA] chiếm tới $9.187$ chuỗi, tương đương $69{,}04\%$ số chuỗi đạt chuẩn kiểm soát chất lượng và $66{,}35\%$ toàn bộ tệp dữ liệu thô. Việc loại bỏ khối chuỗi chưa phân loại này là bước tiền xử lý bắt buộc nhằm xây dựng tập dữ liệu đối chuẩn gồm các Subfamily có định danh phân loại chính thức phục vụ đo đạc tính đại diện.
+
+\subsection{Thách thức phân bố mất cân bằng quy mô và hiệu ứng đuôi dài}
+\label{subsec:imbalance_challenge}
+
+Sau quy trình kiểm soát chất lượng và lọc bỏ nhóm chưa phân loại Subfamily, tập dữ liệu phân họ chính thức của Family A1 thu được gồm $|V| = 4.120$ chuỗi protein đã qua kiểm soát chất lượng phân bố trên $G = 115$ Subfamily chính thức. Tập dữ liệu này thể hiện cấu trúc phân bố mất cân bằng cực đoan theo quy luật phân phối đuôi dài.
+
+Subfamily lớn nhất là A01.009 Cathepsin D sở hữu $329$ chuỗi, chiếm gần $8\%$ toàn bộ tập dữ liệu. Ngược lại, phần đuôi phân bố ghi nhận $45$ Subfamily hiếm có số chuỗi $\le 5$, trong đó có $18$ Subfamily đơn độc chỉ chứa đúng một chuỗi duy nhất với $n_g = 1$. Tỷ lệ mất cân bằng quy mô giữa phân họ lớn nhất và phân họ đơn độc lên tới $329{,}0$ lần:
+\begin{equation}
+\label{eq:imbalance_ratio}
+\text{Imbalance Ratio} = \frac{n_{\max}}{n_{\min}} = \frac{329}{1} = 329{,}0
+\end{equation}
+Đặc điểm phân bố này tạo ra thách thức lớn: các thuật toán tối ưu hóa dựa trên số lượng mẫu tuyệt đối sẽ bị chi phối bởi tổng trọng số của các Subfamily lớn, dẫn tới việc tập trung ngân sách đại diện vào các Subfamily lớn và khiến các Subfamily hiếm không có đại diện trong tập nghiệm, làm mất thông tin về các biến dị chức năng đặc thù của các nhánh tiến hóa thiểu số.
+
+\section{Tổng quan các phương pháp chọn tập protein đại diện}
+\label{sec:theory_rep_methods}
+
+Chọn tập protein đại diện là bước tiền xử lý bắt buộc nhằm loại bỏ tính dư thừa thông tin và tối ưu hóa chi phí tính toán trong các phân tích tin sinh học quy mô lớn.
+
+\subsection{Các phương pháp gom cụm truyền thống}
+\label{subsec:traditional_clustering}
+
+Các công cụ gom cụm chuỗi protein dựa trên heuristic sắp xếp độ dài và ngưỡng nhận dạng chuỗi cố định, tiêu biểu là CD-HIT~\cite{cdhit} và MMseqs2~\cite{mmseqs2}, đóng vai trò chuẩn mực trong khử trùng lặp dữ liệu sinh học. Cơ chế cốt lõi là chọn chuỗi dài nhất làm tâm cụm và gom các chuỗi có độ tương đồng k-mer vượt ngưỡng quy định vào cùng một cụm. Tuy nhiên, các phương pháp này bộc lộ ba hạn chế cấu trúc khi áp dụng chọn tập đại diện có kiểm soát ngân sách:
+\begin{enumerate}
+    \item \textbf{Không thể khống chế ngân sách đại diện}: người dùng không thể ấn định trước số lượng chuỗi đại diện $k$; số lượng cụm sinh ra phụ thuộc trực tiếp vào ngưỡng tương đồng cục bộ.
+    \item \textbf{Bùng nổ kích thước tập đại diện khi nâng ngưỡng}: để bảo đảm bao phủ các mối quan hệ tiến hóa xa, việc nâng ngưỡng tương đồng khiến số lượng cụm tăng nhanh. Trên siêu họ Peptidase A1, CD-HIT ở ngưỡng $90\%$ sinh ra tới $8.774$ cụm đại diện, trong khi MMseqs2 sinh ra $1.701$ cụm, làm giảm đáng kể hiệu quả nén dữ liệu.
+    \item \textbf{Cơ chế phân cụm cứng bỏ qua ranh giới phân loại}: việc gom cụm thuần túy dựa trên độ đồng nhất chuỗi hình học, không nhận biết ranh giới Subfamily sinh học, dẫn tới chia cắt các Subfamily lớn và làm lu mờ các Subfamily hiếm.
+\end{enumerate}
+
+\subsection{Mô hình submodular Facility Location không trọng số trên ma trận BLASTp}
+\label{subsec:baseline_model}
+
+Để khắc phục nhược điểm không thể khống chế ngân sách của phương pháp gom cụm, năm 2025, Nguyen và cộng sự~\cite{nguyen2025} đã đề xuất khung tối ưu hóa tổ hợp cực đại hóa hàm tập hợp submodular Facility Location trên cơ sở ma trận tương đồng chuỗi All-vs-All NCBI BLASTp~\cite{blast}.
+
+Xét tập dữ liệu gồm $n$ chuỗi protein $V = \{v_1, v_2, \dots, v_n\}$. Ký hiệu chữ in hoa nghiêng $S, S_k \subseteq V$ biểu thị tập hợp con các chuỗi đại diện được lựa chọn, phân biệt tường minh với ký hiệu in hoa đậm đứng $\mathbf{S} \in [0, 1]^{n \times n}$ biểu thị ma trận tương đồng cặp giữa các phần tử. Ma trận tương đồng BLASTp $\mathbf{S}_{\text{BLAST}} \in [0, 1]^{n \times n}$ được xây dựng từ kết quả thao tác so khớp chuỗi All-vs-All bằng công cụ BLASTp giữa mọi cặp chuỗi trong $V$:
+\begin{equation}
+\label{eq:blast_similarity_def}
+\mathbf{S}_{\text{BLAST}}(u, v) = \frac{\text{pident}(u, v)}{100} \in [0{,}0, \, 1{,}0]
+\end{equation}
+với đường chéo tự nhận dạng $\mathbf{S}_{\text{BLAST}}(v, v) = 1{,}0$ và các cặp không có kết quả so khớp hợp lệ được gán bằng $0{,}0$.
+
+Hàm mục tiêu Facility Location không trọng số đo lường độ bao phủ trên toàn bộ tập dữ liệu của tập con đại diện $S \subseteq V$ và bài toán tối ưu hóa với ngân sách $k$ chuỗi ($k \ll n$) được định nghĩa:
+\begin{equation}
+\label{eq:baseline_facility_location}
+F(S) = \sum_{v \in V} \max_{s \in S} \mathbf{S}_{\text{BLAST}}(s, v), \quad S^* = \arg\max_{S \subseteq V, \, |S| \le k} F(S)
+\end{equation}
+với $F(\emptyset) = 0$. Để giải bài toán, các tác giả áp dụng giải thuật tham lam cắt tỉa Pruned Greedy 90\% kết hợp $1.000$ lần xáo trộn ngẫu nhiên. Trên siêu họ Peptidase A1, phương pháp này đạt tốc độ tích lũy độ bao phủ nhanh: với số lượng chuỗi đại diện từ $k = 9$ đến $k = 11$, cụ thể đạt $90{,}70\%$ tại $k = 9$ và $90{,}90\%$ tại $k = 11$ theo công bố gốc và đạt $90{,}51\%$ tại $k = 8$, $91{,}59\%$ tại $k = 11$ trong thực nghiệm tái hiện, chỉ số Overall Sensitivity đã vượt $90\%$, cải thiện đáng kể tỷ lệ nén so với CD-HIT và MMseqs2.
+
+\subsection{Các hạn chế phương pháp luận của bài báo nền}
+\label{subsec:baseline_limitations}
+
+Mặc dù đạt chỉ số Overall Sensitivity cao, mô hình Facility Location không trọng số của bài báo nền~\cite{nguyen2025} tồn tại ba hạn chế phương pháp luận chính:
+
+\textbf{1. Hạn chế do gán trọng số cá thể đồng nhất}: việc gán trọng số đồng nhất $w_v = 1{,}0$ trong công thức~\eqref{eq:baseline_facility_location} khiến Subfamily lớn A01.009 với $329$ chuỗi đóng góp điểm tiềm năng gấp $329{,}0$ lần Subfamily đơn độc có quy mô $n_g = 1$. Giải thuật tham lam do ưu tiên tối đa hóa độ tăng cận biên toàn cục nên tập trung dồn ngân sách cho các Subfamily lớn, dẫn tới việc bỏ sót các Subfamily hiếm khỏi tập đại diện.
+
+\textbf{2. Hạn chế sai lệch bao phủ chéo do đối soát toàn cục}: đánh giá độ đại diện bằng cách gom $k$ chuỗi đại diện vào một tệp truy vấn đa chuỗi duy nhất rồi thực hiện phép tìm kiếm tương đồng trên toàn bộ cơ sở dữ liệu khiến các đại diện của Subfamily lớn so khớp chéo sang các cá thể thuộc Subfamily hiếm tại các motif bảo tồn chung. Cơ chế này tạo ra con số Overall Sensitivity cao trên $90\%$ thông qua bao phủ chéo liên phân họ, che giấu thực tế rằng không có đại diện trực tiếp nào được lựa chọn cho các Subfamily hiếm.
+
+\textbf{3. Giới hạn của ma trận tương đồng rời rạc BLASTp}: ma trận $\mathbf{S}_{\text{BLAST}}$ dựa trên so khớp ký tự chuỗi sơ cấp bề mặt bị giới hạn bởi ngưỡng cắt thống kê $E$-value và độ thưa lớn, không thể nắm bắt các mối quan hệ tương đồng tiến hóa xa giữa các protein phân kỳ sâu về trình tự axit amin nhưng bảo tồn cấu trúc không gian và chức năng sinh học.
+
+\section{Cơ sở lý thuyết tối ưu hóa tổ hợp submodular}
+\label{sec:theory_submodular}
+
+Tối ưu hóa submodular là nhánh toán học tổ hợp nghiên cứu các hàm tập hợp thỏa mãn quy luật suy giảm cận biên, cung cấp các bảo đảm lý thuyết chặt chẽ cho nhiều bài toán thuộc lớp NP-khó trong không gian rời rạc~\cite{krause2014}.
+
+\subsection{Tính submodular và bài toán cực đại hóa có ràng buộc}
+\label{subsec:submodularity_and_problem}
+
+Cho tập dữ liệu hữu hạn $V = \{v_1, v_2, \dots, v_n\}$ và tập lũy thừa $2^V$. Một hàm tập hợp $F: 2^V \to \mathbb{R}$ được gọi là chuẩn hóa nếu $F(\emptyset) = 0$ và đơn điệu không giảm nếu $A \subseteq B \subseteq V \implies F(A) \le F(B)$. Với tập hợp $S \subseteq V$ và phần tử $e \in V \setminus S$, độ tăng cận biên khi bổ sung $e$ vào $S$ được xác định bởi $\Delta(e \mid S) = F(S \cup \{e\}) - F(S)$. Hàm $F$ có tính submodular nếu thỏa mãn quy luật lợi ích cận biên giảm dần~\cite{krause2014}:
+\begin{equation}
+\label{eq:submodularity_def}
+\forall A \subseteq B \subseteq V, \quad \forall e \in V \setminus B \implies \Delta(e \mid A) \ge \Delta(e \mid B)
+\end{equation}
+
+Trong đề tài này, bài toán chọn tập protein đại diện tối ưu được phát biểu dưới dạng cực đại hóa hàm submodular đơn điệu có ràng buộc lực lượng tập hợp~\cite{nemhauser1978,krause2014}:
+\begin{equation}
+\label{eq:submodular_cardinality_problem}
+\max_{S \subseteq V} F(S) \quad \text{sao cho} \quad |S| \le k
+\end{equation}
+với ngân sách $k \ll n$. Đây là bài toán NP-khó với không gian tìm kiếm tổ hợp bùng nổ $\binom{n}{k}$, không thể giải bằng phương pháp duyệt toàn bộ và đòi hỏi các giải thuật xấp xỉ thời gian đa thức hiệu quả.
+
+\subsection{Giải thuật tham lam và bảo đảm xấp xỉ Nemhauser}
+\label{subsec:greedy_nemhauser}
+
+Để giải bài toán trên trong thời gian đa thức, giải thuật tham lam chuẩn khởi tạo từ $S_0 = \emptyset$ và tại mỗi bước lặp $t = 1, 2, \dots, k$ chọn phần tử mang lại độ tăng cận biên cực đại:
+\begin{equation}
+\label{eq:greedy_step}
+e^* = \arg\max_{e \in V \setminus S_{t-1}} \Delta(e \mid S_{t-1}), \quad S_t = S_{t-1} \cup \{e^*\}
+\end{equation}
+
+Bảo chứng toán học cho chất lượng nghiệm của giải thuật tham lam được xác lập bởi định lý nền tảng của Nemhauser, Wolsey và Fisher~\cite{nemhauser1978}:
+
+\noindent\refstepcounter{theorem}\textbf{Định lý \thetheorem: định lý Nemhauser~\cite{nemhauser1978}.} \textit{Cho $F: 2^V \to \mathbb{R}$ là hàm tập hợp đơn điệu không giảm, submodular và chuẩn hóa $F(\emptyset) = 0$. Gọi $S_k$ là nghiệm tham lam và $S^* = \arg\max_{|S| \le k} F(S)$ là nghiệm tối ưu toàn cục. Khi đó:
+\begin{equation}
+\label{eq:nemhauser_bound}
+F(S_k) \ge \left(1 - \frac{1}{e}\right) F(S^*) \approx 63{,}2\% \times F(S^*)
+\end{equation}
+trong đó $e \approx 2{,}71828$ là cơ số logarit tự nhiên.}
+
+Cận $1 - 1/e$ là cận chặt về mặt lý thuyết: không tồn tại thuật toán thời gian đa thức nào đạt hệ số xấp xỉ tốt hơn trừ khi $P = NP$ theo chứng minh của Feige~\cite{feige1998}. Định lý Nemhauser xác lập nền tảng toán học cho khung phương pháp đề xuất trong đồ án.
+
+\section{Biểu diễn phân tử và mô hình ngôn ngữ protein ESM-2}
+\label{sec:theory_esm2}
+
+Không gian biểu diễn phân tử quyết định cách thức định lượng độ tương đồng giữa các protein, đóng vai trò là ma trận đầu vào trực tiếp cho hàm mục tiêu submodular Facility Location. Bên cạnh không gian tương đồng chuỗi truyền thống, việc khảo sát các mô hình ngôn ngữ protein như ESM-2 mở ra hướng tiếp cận biểu diễn phân tử liên tục nhiều chiều phục vụ phân tích đối sánh thực nghiệm.
+
+\subsection{Từ biểu diễn chuỗi ký tự rời rạc đến không gian vector nhúng ngữ nghĩa sâu}
+\label{subsec:representation_shift}
+
+Biểu diễn chuỗi ký tự một chiều truyền thống qua phép tìm kiếm tương đồng chuỗi NCBI BLASTp~\cite{blast} chỉ ghi nhận tương đồng bề mặt, thường bỏ sót các protein có trình tự phân kỳ sâu, thường dưới $20\% - 25\%$ độ nhận dạng, nhưng vẫn chia sẻ chung cấu trúc cuộn gập ba chiều và cơ chế xúc tác. Mô hình ngôn ngữ protein tiền huấn luyện, tiêu biểu là dòng ESM~\cite{esm2}, giải quyết giới hạn này bằng cách tiếp cận chuỗi protein như một ngôn ngữ sinh học tự nhiên. Bằng cách chiếu chuỗi vào không gian vector nhúng liên tục nhiều chiều, mô hình nắm bắt đồng thời các đặc trưng cấu trúc bậc cao, vị trí tâm hoạt động và tương tác đồng biến dị tiến hóa mà không cần dữ liệu thực nghiệm tinh thể học.
+
+\subsection{Kiến trúc Transformer và cơ chế dự đoán axit amin bị che khuất}
+\label{subsec:transformer_mlm}
+
+Mô hình ESM-2~\cite{esm2} sử dụng kiến trúc Transformer Encoder với cơ chế tự chú ý Self-Attention, cho phép các gốc axit amin tương tác trực tiếp bất kể khoảng cách vị trí trên chuỗi sơ cấp, mô phỏng cấu trúc không gian ba chiều của protein. Mô hình được huấn luyện tự giám sát qua cơ chế dự đoán vị trí axit amin bị che khuất trên UniRef50 với tỷ lệ che $15\%$ gốc axit amin:
+\begin{equation}
+\label{eq:mlm_loss}
+\mathcal{L}_{\text{MLM}} = -\sum_{i \in \mathcal{M}} \log P(x_i \mid x_{\setminus \mathcal{M}}; \, \Theta)
+\end{equation}
+buộc mạng học các quy luật lý hóa chi phối quá trình cuộn gập. Trong đồ án này, mô hình facebook/esm2\_t12\_35M\_UR50D gồm 12 tầng Transformer với $d = 480$ chiều được chọn để cân bằng giữa năng lực biểu diễn và hiệu quả tính toán GPU.
+
+\subsection{Kỹ thuật trích xuất vector nhúng mức chuỗi}
+\label{subsec:mean_pooling}
+
+Với chuỗi protein $v$ có độ dài $L_v$ axit amin, tầng cuối của ESM-2 sinh ra dãy trạng thái ẩn $\{h_{v, i}\}_{i=1}^{L_v} \subset \mathbb{R}^{480}$. Để tạo một vector duy nhất đại diện cho toàn bộ chuỗi, kỹ thuật gộp trung bình theo chiều dài chuỗi được áp dụng:
+\begin{equation}
+\label{eq:mean_pooling}
+z_v = \frac{1}{L_v} \sum_{i=1}^{L_v} h_{v, i} \in \mathbb{R}^{480}
+\end{equation}
+Vector nhúng mức chuỗi $z_v$ tổng hợp thông tin phân bố trên toàn chuỗi, tránh thiên lệch cục bộ vào các đoạn motif riêng lẻ.
+
+\subsection{Hiện tượng co cụm vector và sự cần thiết của phép dịch tâm}
+\label{subsec:representation_anisotropy}
+
+Dù chứa thông tin phong phú, không gian nhúng của ESM-2 gặp hạn chế hình học phổ biến trong học sâu là hiện tượng co cụm vector~\cite{ethayarajh2019}: các vector $z_v$ bị nén vào một góc nón hẹp trong không gian $\mathbb{R}^d$ quanh vector tâm lệch $\mu = \frac{1}{|V|} \sum_{v \in V} z_v \neq \mathbf{0}$, khiến độ tương đồng cosine trần giữa hai chuỗi protein bất kỳ bị đẩy lên dải giá trị cao:
+\begin{equation}
+\label{eq:anisotropy_cosine}
+\cos(z_u, z_v) = \frac{z_u \cdot z_v}{\|z_u\|_2 \, \|z_v\|_2} \in [0{,}85, \, 0{,}98]
+\end{equation}
+kể cả khi hai cá thể protein khác biệt rõ về cấu trúc và chức năng sinh học. Dải giá trị hẹp $[0{,}85, \, 0{,}98]$ làm giảm độ tương phản khoảng cách, khiến giải thuật tham lam trong submodular Facility Location khó phân biệt mức độ tương đồng thực tế giữa các chuỗi. Do đó, kỹ thuật dịch tâm Mean-Centering nhằm khử vector lệch $\mu$ và khôi phục tính đẳng hướng là bước xử lý cần thiết sẽ được thiết lập tại chương~\ref{chap:methodology}.

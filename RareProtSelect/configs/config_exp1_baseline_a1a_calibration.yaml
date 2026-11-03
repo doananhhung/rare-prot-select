@@ -1,0 +1,36 @@
+experiment_name: "exp1_baseline_a1a_calibration"
+dataset_name: "MEROPS_A1A"
+fasta_path: "../baseline_repo/MEROPS_A1A.fasta"
+output_dir: "outputs"
+
+# Tiền xử lý QC (Công đoạn 1.2 trong Tài liệu 1)
+min_seq_len: 30
+max_seq_len: 2000
+max_ambiguous_ratio: 0.05
+rare_threshold: 5
+
+# Tham số ma trận BLASTp All-vs-All (Công đoạn 3.3 trong Tài liệu 1)
+blast_bin_path: "tools/blast/bin/blastp.exe"
+blast_similarity_matrix:
+  evalue: 0.05
+  max_target_seqs: 100
+  word_size: 3
+  num_threads: 24
+
+# Tham số thuật toán bài báo gốc (Công đoạn 4.3 & 8.1 trong Tài liệu 1)
+algorithm_name: "Pruned Greedy 90% (1,000-Shuffle Consensus Ranking)"
+prune_threshold: 0.90
+num_shuffles: 1000
+seed: 42
+
+# Dải ngân sách khảo sát đối chiếu nguyên văn Hình 8 Panel A (Nguyen et al., 2025)
+budget_k_list: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+
+# Tham số đánh giá Live BLAST Coverage trực tiếp (Công đoạn 5.1 & 8.1 trong Tài liệu 1)
+blast_live_coverage_evaluation:
+  evalue: 1.0e-7
+  max_target_seqs: 999999
+  num_threads: 24
+
+# Đường dẫn tệp CSV Nguồn sự thật lưu 11 mốc ước lượng từ Hình 8 Panel A (Nguyen et al., 2025)
+published_benchmark_csv: "outputs/tables/nguyen2025_fig8a_benchmark.csv"

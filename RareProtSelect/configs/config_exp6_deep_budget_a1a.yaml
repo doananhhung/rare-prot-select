@@ -1,0 +1,50 @@
+# ==============================================================================
+# CẤU HÌNH THỰC NGHIỆM NHÁNH 6: KHẢO SÁT NGÂN SÁCH SÂU & BÃO HÒA PHÂN HỌ LỚN
+# Đề tài 2: RareProtSelect - MEROPS A1A Curated (Phương án 3B)
+# ==============================================================================
+
+experiment_name: "exp6_deep_budget_a1a"
+description: "Khảo sát ngân sách sâu k in [115..380] để phân tích độ bão hòa 100% của 38 phân họ lớn và A01.009"
+
+# 1. Đường dẫn dữ liệu & tiền xử lý
+dataset_name: "MEROPS_A1A_curated"
+fasta_path: "../baseline_repo/MEROPS_A1A.fasta"
+output_dir: "outputs"
+exclude_unknown_subfamilies: true  # Loại bỏ 9,187 chuỗi [A01.UPA], giữ 4,120 chuỗi sạch của 115 họ
+min_seq_len: 30
+max_seq_len: 2000
+max_ambiguous_ratio: 0.05
+rare_threshold: 5
+
+blast_bin_path: "tools/blast/bin/blastp.exe"
+
+# 2. Hai không gian biểu diễn đối đầu
+similarity_spaces:
+  - name: "BLASTp"
+    sim_matrix_cache: "outputs/similarity_cache/MEROPS_A1A_curated_blastp_sim_matrix.npz"
+  - name: "ESM-2"
+    sim_matrix_cache: "outputs/similarity_cache/MEROPS_A1A_curated_esm2_mc_cosine_sim_matrix.npz"
+
+# 3. Ba mức trọng số hiếm
+alphas: [0.0, 0.5, 1.0]
+
+# 4. Tham số thuật toán Pruned Greedy
+num_shuffles: 1000
+prune_threshold: 0.90
+budget_per_shuffle: 380   # Nâng trần chọn tuần tự lên 380 chuỗi đại diện
+seed: 42
+
+# 5. Dải 6 mốc ngân sách chuyển pha sâu (Zoom trực diện vào dải bão hòa k >= 115)
+budget_k_list: [115, 150, 200, 270, 340, 380]
+
+# 6. Cấu hình phân tầng quy mô phân họ (Subfamily Stratification)
+stratification:
+  dominant_subfamily_id: "A01.009"  # Cathepsin D (329 chuỗi)
+  large_threshold: 20               # n_g >= 20: 38 phân họ lớn
+  medium_threshold: 6               # 6 <= n_g <= 19: 32 phân họ trung bình
+  rare_threshold: 5                 # n_g <= 5: 45 phân họ hiếm (gồm 18 singletons)
+
+# 7. Cấu hình đánh giá
+evaluation:
+  evalue_threshold: 1.0e-7          # Ngưỡng Live BLASTp E-value
+  esm_saturation_threshold: 99.5    # Ngưỡng công nhận bão hòa ESM Cov (%)

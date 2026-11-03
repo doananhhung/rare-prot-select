@@ -1,0 +1,15 @@
+\chapter*{Tóm tắt}
+\phantomsection
+\addcontentsline{toc}{chapter}{Tóm tắt}
+
+Chọn tập chuỗi protein đại diện có kiểm soát ngân sách là bài toán tiền xử lý quan trọng trong tin sinh học phân tử nhằm giảm chi phí tính toán cho so khớp đa chuỗi và phân tích tiến hóa. Thách thức lớn nhất là phân bố mất cân bằng lớn về quy mô theo quy luật đuôi dài trong các siêu họ enzyme tự nhiên, điển hình tại siêu họ Peptidase A1 trong cơ sở dữ liệu MEROPS~\cite{merops} với tập dữ liệu gồm $4.120$ chuỗi thuộc $115$ Subfamily chính thức sau khi loại bỏ các chuỗi chưa phân loại. Các công cụ gom cụm truyền thống như CD-HIT~\cite{cdhit} hay MMseqs2~\cite{mmseqs2} không thể kiểm soát trực tiếp số lượng chuỗi đại diện. Trong khi đó, mô hình submodular Facility Location không trọng số~\cite{nguyen2025} dồn ngân sách vào các phân họ lớn, bỏ sót hơn một nửa số Subfamily ở mức $0\%$ Sensitivity và gây sai lệch bao phủ chéo ngoài ranh giới phân họ.
+
+Đồ án đề xuất khung phương pháp luận RareProtSelect gồm ba đóng góp cốt lõi. Thứ nhất, thiết lập họ hàm mục tiêu Weighted Facility Location với trọng số nghịch đảo quy mô Subfamily, chứng minh giải tích tính đơn điệu không giảm, tính submodular và thiết lập nền tảng lý thuyết theo cận xấp xỉ $(1 - 1/e)$ của giải thuật tham lam chuẩn~\cite{nemhauser1978}. Thứ hai, hiện thực hóa giải thuật Pruned Greedy trên GPU kết hợp cơ chế xác lập thứ hạng đồng thuận và khung đánh giá nội phân họ Within-Subfamily Coverage nhằm loại bỏ sai lệch bao phủ chéo. Thứ ba, tích hợp module khảo sát mở rộng trên không gian ngữ nghĩa liên tục ESM-2~\cite{esm2} kết hợp kỹ thuật dịch tâm Mean-Centering nhằm khắc phục hiện tượng co cụm vector.
+
+Kết quả từ chuỗi 6 thử nghiệm tuần tự khẳng định tham số $\alpha$ điều khiển trực tiếp sự đánh đổi đa mục tiêu giữa độ bao phủ toàn cục và chỉ số Rare Sensitivity: dù ở vùng ngân sách nhỏ và trung bình ($k < G$) việc ưu tiên nhóm hiếm đòi hỏi giảm một phần chỉ số Overall Sensitivity, tại ngân sách đối chuẩn đầy đủ $k = G = 115$ trên không gian NCBI BLASTp~\cite{blast}, cấu hình trọng số cân bằng $\alpha = 0{,}5$ nâng chỉ số Rare Sensitivity từ $2{,}22\%$ lên $59{,}11\%$, tức tăng gấp $26{,}6$ lần khi cố định ngưỡng ngân sách tối đa $k_{\max} = 115$ và đạt $50{,}22\%$, tức gấp $22{,}6$ lần khi mở rộng ngưỡng ngân sách tối đa lên $k_{\max} = 380$, đồng thời nâng chỉ số Macro-Average Sensitivity từ $49{,}28\%$ lên $78{,}87\%$ mà vẫn duy trì chỉ số Overall Sensitivity ở mức $94{,}13\%$ so với $93{,}57\%$ của mô hình cơ sở không trọng số. Hiệu năng bảo tồn nhóm hiếm cũng được cải thiện trên không gian ngữ nghĩa liên tục ESM-2 ở vùng ngân sách trung bình; đồng thời khi mở rộng ngân sách lên $k = 380$, tập đại diện hội tụ và bao phủ $112$ trên $115$ Subfamily trong siêu họ.
+
+\smallskip
+
+{\raggedright\noindent\textbf{Từ khóa:} chọn tập protein đại diện, tối ưu hóa submodular, Subfamily hiếm, Weighted Facility Location, Within-Subfamily Coverage, mô hình ngôn ngữ protein ESM-2, MEROPS Family A1.\par}
+
+\clearpage

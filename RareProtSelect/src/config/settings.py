@@ -5,7 +5,6 @@ from __future__ import annotations
 import os
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any
 
 import yaml
 
@@ -79,10 +78,11 @@ class ExperimentConfig:
     min_seq_len: int = 30
     max_seq_len: int = 2000
     max_ambiguous_ratio: float = 0.05
+    exclude_unknown_subfamilies: bool = False
     output_dir: str = "outputs"
     cache_dir: str = "outputs/embeddings_cache"
     seed: int = 42
-    extra_params: dict[str, Any] = field(default_factory=dict)
+    extra_params: dict[str, object] = field(default_factory=dict)
 
     def get_path_config(self) -> PathConfig:
         """Tạo đối tượng PathConfig từ cấu hình thực nghiệm."""
@@ -128,7 +128,7 @@ class ExperimentConfig:
             seed=self.seed,
         )
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, object]:
         """Chuyển đổi cấu hình thành từ điển."""
         return asdict(self)
 
@@ -157,13 +157,14 @@ def load_config(yaml_path: str | Path) -> ExperimentConfig:
         "min_seq_len",
         "max_seq_len",
         "max_ambiguous_ratio",
+        "exclude_unknown_subfamilies",
         "output_dir",
         "cache_dir",
         "seed",
     }
 
-    constructor_kwargs: dict[str, Any] = {}
-    extra_params: dict[str, Any] = {}
+    constructor_kwargs: dict[str, object] = {}
+    extra_params: dict[str, object] = {}
 
     for key, value in data.items():
         if key in known_fields:
@@ -208,7 +209,15 @@ def validate_config(config: ExperimentConfig) -> bool:
     if not config.budget_k_list or not all(isinstance(k, int) and k > 0 for k in config.budget_k_list):
         raise ValueError("`budget_k_list` phải là danh sách các số nguyên dương.")
 
-    valid_schemes = {"inverse_sqrt", "uniform", "inverse_freq", "power"}
+    valid_schemes = {
+        "inverse_sqrt",
+        "uniform",
+        "inverse_freq",
+        "power",
+        "inverse_linear",
+        "logarithmic",
+        "smoothed_inverse",
+    }
     if config.weighting_scheme not in valid_schemes:
         raise ValueError(
             f"`weighting_scheme` không hợp lệ: '{config.weighting_scheme}'. "

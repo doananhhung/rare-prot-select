@@ -1,0 +1,34 @@
+\chapter*{Mở đầu}
+\addcontentsline{toc}{chapter}{Mở đầu}
+\label{chap:introduction}
+
+\section*{Tính cấp thiết của đề tài}
+Sự bùng nổ của công nghệ giải trình tự thế hệ mới tạo ra nguồn dữ liệu chuỗi protein quy mô lớn trong các cơ sở dữ liệu quốc tế như UniProt hay MEROPS~\cite{merops}. Nguồn dữ liệu lớn mở ra nhiều cơ hội cho sinh học tính toán, song cũng đặt ra thách thức lớn về chi phí tính toán và ngân sách thực nghiệm hóa sinh trong phòng thí nghiệm. Do đó, chọn lọc tập hợp con nhỏ gọn gồm các chuỗi protein đại diện nhằm nắm bắt tối đa không gian chức năng và tiến hóa của siêu họ enzyme trở thành bài toán quan trọng.
+
+Tuy nhiên, các siêu họ protein trong tự nhiên thường phân bố mất cân bằng lớn về quy mô theo quy luật đuôi dài: một số ít Subfamily lớn chiếm phần lớn số lượng chuỗi, trong khi 45 Subfamily hiếm chỉ sở hữu từ một đến vài cá thể. Các công cụ gom cụm truyền thống như CD-HIT~\cite{cdhit} hay MMseqs2~\cite{mmseqs2} thường thiên về vùng mật độ cao và không kiểm soát được ngân sách. Mô hình submodular Facility Location không trọng số trên ma trận NCBI BLASTp~\cite{blast} của Nguyen và cộng sự~\cite{nguyen2025} dù đạt chỉ số Overall Sensitivity cao nhưng bộc lộ hạn chế về phương pháp luận: việc thiếu cơ chế tái cân bằng quy mô khiến giải thuật tham lam dồn ngân sách cho các Subfamily lớn và bỏ sót các Subfamily hiếm, đồng thời phép đối soát toàn cục gây sai lệch bao phủ chéo ngoài ranh giới Subfamily. Do đó, việc thiết kế phương pháp chọn tập đại diện khắc phục các hạn chế trên là nhiệm vụ khoa học có tính thực tiễn cao.
+
+\section*{Mục tiêu và nhiệm vụ nghiên cứu}
+Đồ án phát triển phương pháp RareProtSelect chọn tập protein đại diện có ưu tiên nhóm hiếm dựa trên hàm mục tiêu submodular có trọng số nghịch đảo quy mô Subfamily và khảo sát mở rộng trên không gian ngữ nghĩa liên tục ESM-2~\cite{esm2} qua năm nhiệm vụ:
+\begin{enumerate}[noitemsep,topsep=1pt,partopsep=0pt,parsep=0pt]
+    \item \textbf{Sàng lọc và chuẩn bị dữ liệu phân họ chính thức}: loại bỏ nhóm chuỗi chưa phân loại để xây dựng tập dữ liệu phân họ chính thức gồm $115$ Subfamily thuộc Family A1 từ MEROPS~\cite{merops}.
+    \item \textbf{Tái lập đối chuẩn độc lập}: tái hiện mô hình của bài báo nền~\cite{nguyen2025} làm mốc đối chứng và lượng hóa mức độ thiếu hụt đại diện của các Subfamily hiếm.
+    \item \textbf{Thiết kế hàm mục tiêu có trọng số}: xây dựng họ hàm mục tiêu Weighted Facility Location với trọng số nghịch đảo quy mô Subfamily kết hợp giải thuật Pruned Greedy 90\% xáo trộn ngẫu nhiên.
+    \item \textbf{Khảo sát mở rộng với mô hình ngôn ngữ protein}: đánh giá biểu diễn vector nhúng ESM-2~\cite{esm2} kết hợp dịch tâm Mean-Centering đối chiếu với không gian tương đồng chuỗi truyền thống.
+    \item \textbf{Kiểm tra chéo và phân tích bão hòa}: thực hiện kiểm tra chéo hai chiều giữa BLASTp và ESM-2, đồng thời khảo sát độ bão hòa khi mở rộng ngân sách.
+\end{enumerate}
+
+\section*{Đối tượng và phạm vi nghiên cứu}
+\begin{itemize}[noitemsep,topsep=1pt,partopsep=0pt,parsep=0pt]
+    \item \textbf{Đối tượng nghiên cứu}: các chuỗi protein và cấu trúc phân loại của siêu họ Peptidase A1 thuộc Family A1, Clan AA trong MEROPS với 115 Subfamily chính thức.
+    \item \textbf{Phạm vi nghiên cứu}: bài toán tối ưu hóa cực đại hóa hàm submodular đơn điệu có ràng buộc lực lượng $|S| \le k$, đánh giá trên hai không gian biểu diễn gồm không gian tương đồng chuỗi cơ sở All-vs-All NCBI BLASTp~\cite{blast} và module khảo sát mở rộng trên ma trận cosine sau dịch tâm từ vector nhúng ESM-2~\cite{esm2}.
+\end{itemize}
+
+\section*{Phương pháp nghiên cứu}
+Đồ án kết hợp chặt chẽ giữa nghiên cứu lý thuyết toán học và thực nghiệm tính toán:
+\begin{itemize}[noitemsep,topsep=1pt,partopsep=0pt,parsep=0pt]
+    \item \textbf{Phương pháp lý thuyết}: vận dụng lý thuyết hàm submodular để chứng minh tính đơn điệu, tính submodular của hàm Weighted Facility Location, thiết lập nền tảng lý thuyết theo cận xấp xỉ $(1 - 1/e)$ của giải thuật tham lam chuẩn theo định lý Nemhauser~\cite{nemhauser1978} làm cơ sở cho giải thuật tham lam cắt tỉa kết hợp xếp hạng đồng thuận trong thực nghiệm.
+    \item \textbf{Phương pháp thực nghiệm}: triển khai chuỗi 6 thử nghiệm tuần tự có kiểm soát: thử nghiệm 1 tái hiện bài báo nền trên $13.307$ chuỗi; thử nghiệm 2 thiết lập mô hình cơ sở mới và cô lập ảnh hưởng của hệ số trọng số $\alpha \in \{0{,}0, 0{,}5, 1{,}0\}$ trên tập dữ liệu phân họ chính thức $4.120$ chuỗi qua cơ chế Within-Subfamily Coverage; thử nghiệm 3 khảo sát $\alpha$ trên không gian ESM-2 dịch tâm; thử nghiệm 4 kiểm tra chéo hai chiều cô lập Ma trận chọn $\times$ Thước đo đánh giá; thử nghiệm 5 và 6 phân tích cơ cấu phân bổ vị trí đại diện và quá trình bão hòa độ bao phủ khi mở rộng ngân sách.
+\end{itemize}
+
+\section*{Bố cục của đồ án}
+Ngoài phần mở đầu và danh mục tài liệu tham khảo, nội dung đồ án gồm bốn chương: \textbf{chương 1 --- tổng quan và cơ sở lý thuyết} trình bày đặc điểm siêu họ Peptidase A1, các phương pháp chọn đại diện, tối ưu hóa submodular và mô hình ESM-2; \textbf{chương 2 --- phương pháp đề xuất RareProtSelect} thiết lập hàm mục tiêu có trọng số, module ESM-2 dịch tâm Mean-Centering, giải thuật Pruned Greedy 90\% và thước đo Within-Subfamily Coverage; \textbf{chương 3 --- chuỗi thực nghiệm có kiểm soát và đánh giá kết quả} báo cáo chuỗi 6 thử nghiệm cô lập biến số, đối chứng đa chiều và phân tích bão hòa; \textbf{chương 4 --- kết luận và hướng phát triển} tổng kết đóng góp khoa học, chỉ rõ ranh giới kiểm chứng và định hướng nghiên cứu tiếp theo.

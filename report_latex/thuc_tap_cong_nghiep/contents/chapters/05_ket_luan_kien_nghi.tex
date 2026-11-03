@@ -1,0 +1,49 @@
+\chapter{KẾT LUẬN VÀ KIẾN NGHỊ}
+\label{chap:ket_luan_kien_nghi}
+
+Chương này tổng kết toàn bộ các kết quả đạt được trong đợt thực tập công nghiệp tại phòng thí nghiệm ORLab, đề xuất các hướng phát triển nghiên cứu tiếp theo cho đề tài RareProtSelect và đưa ra các kiến nghị mang tính xây dựng nhằm nâng cao chất lượng chương trình thực tập.
+
+\section{Tổng kết công việc thực tập}
+\label{sec:tong_ket_thuc_tap}
+
+Kỳ thực tập công nghiệp tại phòng thí nghiệm ORLab đã giúp tôi hoàn thành xuất sắc các mục tiêu học thuật và nhiệm vụ kỹ thuật được giao:
+\begin{enumerate}
+    \item \textbf{Khắc phục hạn chế phương pháp luận}: Đã phát hiện và giải quyết thành công điểm mù thiên lệch quy mô mẫu của các phương pháp chọn protein đại diện truyền thống trên phân bố đuôi dài Long-Tail.
+    \item \textbf{Đóng góp mô hình toán học}: Xây dựng thành công mô hình submodular Facility Location có trọng số phạt quy mô nhóm $w_v^{(\alpha)} = (n_g)^{-\alpha}$ với bảo đảm chặn cận giải tích chặt chẽ $(1 - 1/e)$ theo định lý Nemhauser.
+    \item \textbf{Kết quả đối chuẩn chỉ số thực nghiệm}: Trên tập dữ liệu thực nghiệm trọng tâm MEROPS A1A gồm $4.120$ chuỗi thuộc $115$ Subfamily, phương pháp RareProtSelect giúp cải thiện rõ rệt tính đại diện nhóm hiếm: tại $k = 115$, cấu hình $\alpha = 0{,}50$ nâng Rare Sensitivity từ $2{,}22\%$ lên $59{,}11\%$ và $\alpha = 1{,}00$ đạt tới $91{,}11\%$, đồng thời cắt giảm số Subfamily có Zero-Sensitivity Count từ $58$ xuống còn $18$, khắc phục hiệu quả điểm mù bỏ sót Subfamily hiếm của phương pháp truyền thống.
+    \item \textbf{Đóng gói sản phẩm hoàn chỉnh}: hệ thống mã nguồn được xây dựng bài bản bằng Python 3.12, quản lý qua uv, tăng tốc tính toán trên GPU CUDA và lưu trữ toàn bộ dữ liệu thực nghiệm minh bạch, có thể tái~lập~$100\%$.
+\end{enumerate}
+
+\section{Kế hoạch tương lai}
+\label{sec:ke_hoach_tuong_lai}
+
+Trên nền tảng các kết quả đã đạt được trong kỳ thực tập, tôi dự kiến tiếp tục hợp tác cùng ORLab để phát triển đề tài theo các định hướng:
+\begin{itemize}
+    \item \textbf{Đánh giá tính tổng quát hóa trên quy mô siêu lớn}: triển khai đối chuẩn mở rộng trên tập dữ liệu CE.fasta gồm $12.277$ chuỗi từ cơ sở dữ liệu ESTHER, đồng thời nghiên cứu mở rộng thuật toán Lazy Greedy với cấu trúc Max-Heap để tối ưu hóa thời gian tính toán trên các siêu họ enzyme có quy mô trên $10.000$ chuỗi.
+    \item \textbf{Tích hợp thông tin cấu trúc không gian 3 chiều}: Khai thác các ma trận tương đồng cấu trúc dựa trên tọa độ nguyên tử từ AlphaFold2 hoặc ESMFold để bổ sung cho thông tin trình tự sơ cấp.
+    \item \textbf{Công bố công trình khoa học}: Hoàn thiện bản thảo bài báo khoa học dựa trên phương pháp luận RareProtSelect để gửi đăng tại các hội thảo hoặc tạp chí quốc tế uy tín trong danh mục ISI/Scopus thuộc lĩnh~vực~vận~trù~học và tin~sinh~học~tính~toán.
+\end{itemize}
+
+\section{Kiến nghị}
+\label{sec:kien_nghi}
+
+Từ những trải nghiệm thực tế trong kỳ thực tập, tôi xin đề xuất một số kiến nghị nhằm nâng cao hiệu quả đào tạo và nghiên cứu:
+
+\subsection{Đối với nhà trường và khoa}
+\begin{itemize}
+    \item Tiếp tục đẩy mạnh mô hình gắn kết đào tạo lý thuyết với thực hành nghiên cứu tại các phòng thí nghiệm chuyên sâu theo định hướng Lab-based learning ngay từ các năm học đầu.
+    \item Đầu tư và mở rộng hạ tầng máy chủ tính toán hiệu năng cao với các cụm GPU để hỗ trợ sinh viên thực hiện các đề tài trí tuệ nhân tạo và xử lý dữ liệu lớn.
+    \item Tổ chức thêm các hội thảo học thuật định kỳ để sinh viên các nhóm nghiên cứu có cơ hội giao lưu, chia sẻ phương pháp luận và kết quả thực nghiệm.
+\end{itemize}
+
+\subsection{Đối với cơ sở thực tập ORLab}
+\begin{itemize}
+    \item Tiếp tục phát huy thế mạnh về môi trường học thuật nghiêm túc, cởi mở và phương pháp hướng dẫn tận tâm, sát sao đối với sinh viên thực tập.
+    \item Mở rộng kết nối và hợp tác liên ngành với các viện nghiên cứu sinh học phân tử thực nghiệm nhằm tạo điều kiện cho các thuật toán tối ưu hóa được kiểm chứng in vitro trong phòng thí nghiệm sinh học.
+\end{itemize}
+
+\subsection{Đối với sinh viên các khóa tiếp theo}
+\begin{itemize}
+    \item Cần chủ động trang bị nền tảng toán học giải tích, lý thuyết xác suất và kỹ năng lập trình khoa học từ sớm trước khi bước vào kỳ thực tập công nghiệp.
+    \item Rèn luyện tác phong kỷ luật, tư duy phản biện và tinh thần tự học, chủ động trao đổi thường xuyên với cán bộ hướng dẫn để tháo gỡ kịp thời các khó khăn phát sinh trong quá trình nghiên cứu.
+\end{itemize}

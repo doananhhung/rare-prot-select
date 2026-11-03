@@ -5,7 +5,6 @@ from __future__ import annotations
 import re
 from collections import Counter
 from dataclasses import dataclass
-from typing import Any
 
 from src.data.fasta_parser import ProteinRecord
 
@@ -25,16 +24,26 @@ class AnnotationMapping:
 class AnnotationMapper:
     """Bộ trích xuất và ánh xạ nhãn phân loại học / phân họ protein."""
 
+    UNKNOWN_LABELS: frozenset[str] = frozenset(
+        {"A01.Unknown", "F_Unknown", "TE_Unclassified", "UNKNOWN"}
+    )
+
+    @staticmethod
+    def is_unknown_label(label: str) -> bool:
+        """Kiểm tra xem nhãn phân họ có thuộc nhóm chưa định danh (Unknown / UPA) hay không."""
+        return label in AnnotationMapper.UNKNOWN_LABELS
+
     @staticmethod
     def extract_merops_subfamily(header: str) -> str:
-        """Trích xuất mã phân họ [A01.xxx] từ header MEROPS A1A."""
-        match = re.search(r"\[(A\d{2}\.\d{3})\]", header)
+        """Trích xuất mã phân họ định danh [A01.xxx] từ header MEROPS A1A.
+
+        Thu nhận đầy đủ cả 75 phân họ mã số ([A01.001]..[A01.971]) và 40 phân họ mã chữ-số
+        ([A01.A02]..[A01.P02]) thành tổng cộng 115 phân họ định danh; gán nhãn 'A01.Unknown'
+        cho khối chuỗi chưa định danh [A01.UPA].
+        """
+        match = re.search(r"\[([A-Z]\d{2}\.(?!UPA)[A-Z0-9]{3})\]", header)
         if match:
             return match.group(1)
-        # Fallback to broader bracket pattern
-        match_broad = re.search(r"\[([A-Z]\d{2}\.\d{3})\]", header)
-        if match_broad:
-            return match_broad.group(1)
         return "A01.Unknown"
 
     @staticmethod
@@ -109,7 +118,7 @@ class AnnotationMapper:
     @classmethod
     def get_subfamily_statistics(
         cls, label_map: dict[str, str], rare_threshold: int = 5
-    ) -> dict[str, Any]:
+    ) -> dict[str, object]:
         """Tính toán thống kê chi tiết cấu trúc phân họ và độ mất cân bằng."""
         if not label_map:
             return {
@@ -213,6 +222,6 @@ def extract_thyme_families(
     return AnnotationMapper.extract_thyme_families(records, mapping_table)
 
 
-def get_subfamily_statistics(label_map: dict[str, str], rare_threshold: int = 5) -> dict[str, Any]:
+def get_subfamily_statistics(label_map: dict[str, str], rare_threshold: int = 5) -> dict[str, object]:
     """Đếm số lượng thành viên n_g của từng phân họ và xác định nhóm hiếm."""
     return AnnotationMapper.get_subfamily_statistics(label_map, rare_threshold)

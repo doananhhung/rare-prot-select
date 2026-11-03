@@ -1,0 +1,514 @@
+\chapter{Phương pháp đề xuất RareProtSelect}
+\label{chap:methodology}
+
+Chương này thiết lập khung phương pháp luận RareProtSelect nhằm giải quyết sự đánh đổi giữa độ bao phủ trên toàn bộ tập dữ liệu và năng lực bảo tồn tính đại diện của các phân họ hiếm trong các siêu họ protein có phân bố mất cân bằng lớn về quy mô. Khung phương pháp luận được xây dựng xoay quanh năm nội dung khoa học trọng tâm: (1) kiến trúc tổng thể bốn tầng tích hợp quy trình sàng lọc và kiểm soát chất lượng dữ liệu nhằm xây dựng tập dữ liệu gồm 115 Subfamily có định danh chính thức trong MEROPS; (2) mô hình toán học submodular Facility Location có trọng số phạt quy mô nhóm kèm các chứng minh giải tích về tính đơn điệu không giảm, tính submodular và bảo đảm cận xấp xỉ Nemhauser; (3) module khảo sát mở rộng không gian tương đồng ngữ nghĩa liên tục qua mô hình ngôn ngữ protein ESM-2 kết hợp kỹ thuật dịch tâm Mean-Centering; (4) giải thuật tối ưu hóa tham lam cắt tỉa Pruned Greedy 90\% vector hóa trên GPU với cơ chế xác lập thứ hạng đồng thuận qua 1.000 lần xáo trộn ngẫu nhiên; và (5) khung đo đạc khoa học dựa trên cơ chế bao phủ nội phân họ Within-Subfamily Coverage nhằm loại bỏ sai lệch bao phủ chéo ngoài ranh giới phân họ và bảo toàn độ chính xác phân loại.
+
+\section{Kiến trúc tổng thể hệ thống RareProtSelect}
+\label{sec:methodology_architecture}
+
+Nhằm khắc phục ba hạn chế phương pháp luận của nghiên cứu nền~\cite{nguyen2025} đã phân tích tại chương~\ref{chap:theory}, RareProtSelect thiết lập quy trình xử lý dữ liệu và tối ưu hóa bốn tầng khép kín.
+
+\subsection{Quy trình luồng dữ liệu bốn tầng}
+\label{subsec:four_tier_pipeline}
+
+Hệ thống tiếp nhận tệp chuỗi protein thô và chuyển hóa tuần tự qua bốn tầng chức năng:
+
+\begin{enumerate}
+    \item \textbf{Tầng 1 --- tiền xử lý dữ liệu và phân loại Subfamily}: tiếp nhận tệp FASTA của siêu họ Peptidase A1 từ MEROPS. Dữ liệu được lọc kiểm soát chất lượng nhằm loại bỏ các chuỗi có độ dài bất thường ngoài khoảng $[30, \, 2.000]$ axit amin, chuỗi chứa trên $5\%$ ký tự không xác định và các chuỗi trùng lặp $100\%$; kết quả kiểm định thực tế xác nhận toàn bộ $13.847$ chuỗi thô có độ dài thuộc khoảng $[54, \, 871]$ axit amin và $4.120$ chuỗi sau sàng lọc thuộc khoảng $[88, \, 526]$ axit amin, đều nằm trong ngưỡng quy định. Sau đó, bộ trích xuất nhãn áp dụng biểu thức chính quy chuẩn hóa để thu nhận $115$ Subfamily chính thức, loại bỏ toàn bộ khối chuỗi môi trường [A01.UPA], xây dựng tập dữ liệu phân họ chính thức $V_{\text{curated}}$ gồm $|V| = 4.120$ chuỗi protein đã qua kiểm soát chất lượng.
+    
+    \item \textbf{Tầng 2 --- không gian tương đồng chuỗi và module khảo sát ngữ nghĩa liên tục}: cung cấp hai không gian ma trận tương đồng độc lập trên tập dữ liệu $V_{\text{curated}}$:
+    \begin{itemize}[noitemsep,topsep=1pt]
+        \item Không gian tương đồng chuỗi cơ sở NCBI BLASTp $\mathbf{S}_{\text{BLAST}} \in [0, 1]^{|V| \times |V|}$ định lượng độ tương đồng chuỗi sơ cấp bề mặt theo công thức~\eqref{eq:blast_similarity_def} kế thừa từ kịch bản Greedy.R của bài báo nền~\cite{nguyen2025} với $\mathbf{S}_{\text{BLAST}}(u, v) = \text{pident}(u, v)/100{,}0$. Cần lưu ý định nghĩa này chưa nhân với tỷ lệ bao phủ chiều dài so khớp (qcovs), do đó hai protein chỉ chia sẻ một đoạn motif xúc tác ngắn bảo tồn cao ($\text{pident} \ge 90\%$ cục bộ) vẫn có thể đạt $\mathbf{S}_{\text{BLAST}}(u, v) \ge 0{,}90$ và kích hoạt ngưỡng cắt tỉa.
+        \item Module khảo sát mở rộng không gian ngữ nghĩa liên tục ESM-2 $\mathbf{S}_{\text{ESM}}^{(\beta=0{,}70)} \in [0, 1]^{|V| \times |V|}$ từ mô hình ngôn ngữ facebook/esm2\_t12\_35M\_UR50D kết hợp kỹ thuật dịch tâm Mean-Centering khôi phục tính đẳng hướng.
+    \end{itemize}
+    
+    \item \textbf{Tầng 3 --- tối ưu hóa submodular có trọng số trên GPU}: khởi tạo họ hàm mục tiêu submodular Facility Location có trọng số nghịch đảo quy mô Subfamily $w_v^{(\alpha)} = (n_{g(v)})^{-\alpha}$ tương ứng với các hệ số phạt $\alpha \in \{0{,}0, \, 0{,}5, \, 1{,}0\}$. Giải thuật Pruned Greedy 90\% được vector hóa trên GPU PyTorch CUDA, kết hợp kỹ thuật cập nhật vector bao phủ lũy tích và cơ chế xác lập thứ hạng đồng thuận qua $1.000$ lần xáo trộn ngẫu nhiên để khắc phục hiện tượng phụ thuộc thứ tự duyệt, trích xuất thứ tự đồng thuận toàn cục $S_{\text{consensus}}$.
+    
+    \item \textbf{Tầng 4 --- khung đo đạc khoa học và đánh giá chéo}: đánh giá tập đại diện $S_k$ qua hai không gian tương đồng bằng cơ chế bao phủ nội phân họ Within-Subfamily Coverage, đo đạc hệ thống $9$ chỉ số hiệu năng phân tầng và $4$ chỉ số cấu trúc phân bổ đại diện trực tiếp, loại bỏ sai lệch bao phủ chéo ngoài ranh giới phân họ.
+\end{enumerate}
+
+\subsection{Quy trình sàng lọc và xây dựng tập dữ liệu phân họ chính thức}
+\label{subsec:methodology_curation}
+
+Trong tệp dữ liệu gốc MEROPS\_A1A.fasta gồm $13.847$ chuỗi, sau khi lọc kiểm soát chất lượng thu được $13.307$ chuỗi protein hợp lệ. Tuy nhiên, việc phân tích tiêu đề trên $13.307$ chuỗi hợp lệ này cho thấy có tới $9.187$ chuỗi mang nhãn [A01.UPA], chiếm $69{,}04\%$ tổng số chuỗi đạt chuẩn kiểm soát chất lượng, tương đương $66{,}35\%$ toàn bộ tệp dữ liệu gốc. Ký hiệu UPA là viết tắt của Unassigned Peptidases, biểu thị các chuỗi thu thập từ mẫu môi trường hoặc đoạn gen chưa được phân loại vào bất kỳ Subfamily sinh học chính thức nào trong MEROPS.
+
+Nếu giữ lại khối [A01.UPA], nhóm chuỗi chưa phân loại có quy mô lớn này sẽ làm sai lệch trọng số toán học và cơ chế đo đạc độ đại diện. Nhằm bảo đảm tính liêm chính dữ liệu sinh học, RareProtSelect áp dụng quy trình sàng lọc:
+\begin{enumerate}
+    \item Sử dụng biểu thức chính quy \textbackslash [([A-Z]\textbackslash d\{2\}\textbackslash .(?!UPA)[A-Z0-9]\{3\})\textbackslash ] để nhận diện đầy đủ $75$ Subfamily mã số chuẩn hóa từ A01.001 đến A01.971 và $40$ Subfamily mã chữ-số như A01.A02, A01.A69, tổng cộng $G = 115$ Subfamily chính thức.
+    \item Gán nhãn A01.Unknown cho khối $9.187$ chuỗi [A01.UPA] và áp dụng bộ lọc loại bỏ khối chuỗi này ra khỏi tập dữ liệu.
+\end{enumerate}
+
+Tập dữ liệu phân họ chính thức thu được ký hiệu là $V_{\text{curated}}$ gồm $|V| = 4.120$ chuỗi protein đã qua kiểm soát chất lượng, $100\%$ chuỗi sở hữu nhãn Subfamily có định danh phân loại chính thức. Trong $115$ Subfamily chính thức, Subfamily lớn nhất là A01.009 Cathepsin D sở hữu $329$ chuỗi, trong khi có $45$ Subfamily hiếm sở hữu số chuỗi $n_g \le 5$, bao gồm $18$ Subfamily đơn độc chỉ có đúng $1$ chuỗi đại diện duy nhất. Tỷ lệ mất cân bằng quy mô giữa phân họ lớn nhất và phân họ đơn độc lên tới $329{,}0$ lần, tạo thành môi trường kiểm chuẩn có độ phân hóa mạnh để đánh giá năng lực của hàm mục tiêu có trọng số.
+
+\section{Hàm mục tiêu submodular có trọng số ưu tiên nhóm hiếm}
+\label{sec:methodology_weighted_submodular}
+
+Nhằm hóa giải sự thiên lệch quy mô của các Subfamily lớn và tái cân bằng mức ưu tiên tối ưu hóa cho các Subfamily hiếm, RareProtSelect mở rộng hàm mục tiêu submodular Facility Location truyền thống thông qua việc tích hợp trọng số mẫu phụ thuộc nghịch đảo vào quy mô của từng Subfamily.
+
+\subsection{Mô hình toán học và họ hàm trọng số nghịch đảo quy mô}
+\label{subsec:weighted_formulation}
+
+Xét tập dữ liệu gồm $n$ chuỗi protein $V = \{v_1, v_2, \dots, v_n\}$ thuộc $G$ Subfamily rời nhau:
+\begin{equation}
+\label{eq:subfamily_partition}
+V = \bigcup_{g=1}^G V_g, \quad V_g \cap V_{g'} = \emptyset \quad (\forall g \neq g')
+\end{equation}
+với $n_g = |V_g|$ là số lượng chuỗi thuộc Subfamily $g$. Với mỗi protein $v \in V$, gọi $g(v)$ là chỉ số Subfamily mà chuỗi $v$ thuộc về. Trọng số mẫu cá thể $w_v^{(\alpha)}$ của protein $v$ được xác định bởi hàm số mũ nghịch đảo quy mô Subfamily:
+\begin{equation}
+\label{eq:sample_weight_formula}
+w_v^{(\alpha)} = \frac{1}{(n_{g(v)})^\alpha}
+\end{equation}
+trong đó $\alpha \ge 0$ là hệ số phạt quy mô nhóm.
+
+Hàm mục tiêu Weighted Facility Location có trọng số ưu tiên nhóm hiếm đối với tập con đại diện $S \subseteq V$ được định nghĩa:
+\begin{equation}
+\label{eq:weighted_facility_location}
+F_\alpha(S) = \sum_{v \in V} w_v^{(\alpha)} \max_{s \in S} \mathbf{S}(s, v)
+\end{equation}
+với quy ước $F_\alpha(\emptyset) = 0$, $S \subseteq V$ là tập hợp con các chuỗi đại diện (phân biệt với ma trận tương đồng in đậm $\mathbf{S} \in [0, 1]^{n \times n}$ thỏa mãn $\mathbf{S}(v, v) = 1{,}0$ và $\mathbf{S}(u, v) \ge 0$).
+
+Bài toán tối ưu hóa với ngân sách $k$ chuỗi đại diện được phát biểu:
+\begin{equation}
+\label{eq:weighted_optimization_problem}
+S_k^* = \arg\max_{S \subseteq V, \, |S| \le k} F_\alpha(S)
+\end{equation}
+
+\subsection{Cơ chế tái cân bằng trọng số trong hàm mục tiêu qua ba chế độ của hệ số \texorpdfstring{$\alpha$}{alpha}}
+\label{subsec:alpha_three_regimes}
+
+Tổng trọng số trong hàm mục tiêu của toàn bộ Subfamily $g$, ký hiệu là $W_g^{(\alpha)}$, được xác định bằng tổng trọng số của toàn bộ các chuỗi thành viên thuộc Subfamily đó:
+\begin{equation}
+\label{eq:subfamily_total_weight}
+W_g^{(\alpha)} = \sum_{v \in V_g} w_v^{(\alpha)} = \sum_{v \in V_g} \frac{1}{(n_g)^\alpha} = n_g \cdot \frac{1}{(n_g)^\alpha} = (n_g)^{1 - \alpha}
+\end{equation}
+
+Công thức~\eqref{eq:subfamily_total_weight} cho thấy hệ số $\alpha$ đóng vai trò là tham số điều khiển trực tiếp mức độ tái phân bổ trọng số trong hàm mục tiêu giữa các Subfamily lớn và các Subfamily thiểu số thông qua ba chế độ đặc trưng:
+
+\begin{enumerate}
+    \item \textbf{Cấu hình không trọng số ($\alpha = 0{,}0$)}: khi $\alpha = 0{,}0$, trọng số của mỗi cá thể là $w_v^{(0)} = 1{,}0$, dẫn tới tổng trọng số trong hàm mục tiêu của Subfamily tỷ lệ thuận trực tiếp với quy mô số lượng cá thể:
+    \begin{equation}
+    W_g^{(0)} = n_g
+    \end{equation}
+    Trong chế độ này, Subfamily lớn nhất A01.009 ($n = 329$) đóng góp tổng trọng số trong hàm mục tiêu gấp đúng $329{,}0$ lần so với một Subfamily hiếm đơn độc có $n = 1$. Độ tăng cận biên khi chọn một đại diện thuộc A01.009 luôn lớn hơn nhiều so với các Subfamily hiếm, dẫn tới việc giải thuật tham lam ưu tiên dồn ngân sách cho các Subfamily lớn.
+    
+    \item \textbf{Cấu hình trọng số cân bằng ($\alpha = 0{,}5$)}: khi $\alpha = 0{,}5$, trọng số cá thể là $w_v^{(0{,}5)} = 1/\sqrt{n_g}$, dẫn tới tổng trọng số trong hàm mục tiêu của Subfamily tỷ lệ thuận với căn bậc hai của quy mô:
+    \begin{equation}
+    W_g^{(0{,}5)} = \sqrt{n_g}
+    \end{equation}
+    Tỷ lệ đóng góp trong hàm mục tiêu giữa Subfamily lớn nhất A01.009 và Subfamily đơn độc $n = 1$ được điều chỉnh giảm từ mức $329{,}0$ lần xuống còn $\sqrt{329} \approx 18{,}14$ lần. Cơ chế điều tiết theo hàm lũy thừa này giúp các Subfamily hiếm sở hữu độ tăng cận biên đủ lớn để cạnh tranh và được chọn vào tập đại diện ngay từ các mốc ngân sách ban đầu, trong khi các Subfamily lớn vẫn giữ tỷ trọng ưu tiên cao hơn để bảo toàn chỉ số Overall Sensitivity. Đây là cấu hình cân bằng hiệu quả giữa hai mục tiêu.
+    
+    \item \textbf{Cấu hình bình đẳng quy mô nhóm ($\alpha = 1{,}0$)}: khi $\alpha = 1{,}0$, trọng số cá thể tỷ lệ nghịch với quy mô $w_v^{(1{,}0)} = 1/n_g$, dẫn tới tổng trọng số trong hàm mục tiêu của mọi Subfamily đều bằng nhau:
+    \begin{equation}
+    W_g^{(1{,}0)} = n_g \cdot \frac{1}{n_g} = 1{,}0, \quad \forall g \in \{1, 2, \dots, G\}
+    \end{equation}
+    Bất kể quy mô Subfamily chứa $329$ chuỗi hay chỉ chứa $1$ chuỗi duy nhất, mỗi Subfamily đều đóng góp $1{,}0$ điểm tiềm năng tối đa vào hàm mục tiêu nội nhóm. Tuy nhiên, cần lưu ý rằng hàm $F_\alpha(S)$ tính cực đại độ tương đồng $\max_{s \in S} \mathbf{S}(s, v)$ trên toàn bộ tập dữ liệu $V$ mà không ngăn chặn tương đồng chéo ngoài ranh giới phân họ $\mathbf{S}(u, v) > 0$. Đồng thời, các Subfamily lớn có biến dị nội nhóm ($\mathbf{S}(u, v) < 1{,}0$), nên một chuỗi đại diện đơn lẻ chưa thể bao phủ hết phân họ lớn; kết hợp với cơ chế xếp hạng tần suất qua $1.000$ vòng xáo trộn, giải thuật có thể chọn đại diện thứ hai cho một Subfamily lớn phân kỳ mạnh trước khi bao phủ một số Subfamily hiếm đã có mức tương đồng chéo nền, giải thích vì sao tại $k = 115$, $\alpha = 1{,}0$ đạt $97$ trên $115$ Subfamily thay vì $115/115$ như phân tích chi tiết tại mục~\ref{subsec:branch5_results}.
+\end{enumerate}
+
+\subsection{Chứng minh tính submodular và bảo đảm cận xấp xỉ Nemhauser}
+\label{subsec:mathematical_proofs}
+
+Để bảo đảm việc tích hợp trọng số mẫu không phá vỡ nền tảng lý thuyết tối ưu hóa tổ hợp, phần này chứng minh hàm mục tiêu $F_\alpha(S)$ bảo toàn tính đơn điệu không giảm và tính submodular.
+
+\noindent\refstepcounter{lemma}\textbf{Bổ đề \thelemma: tính đơn điệu không giảm của $F_\alpha$.} \label{lem:monotonicity} \textit{Hàm mục tiêu $F_\alpha: 2^V \to \mathbb{R}$ xác định bởi công thức~\eqref{eq:weighted_facility_location} là hàm đơn điệu không giảm trên $2^V$, tức với mọi $A \subseteq B \subseteq V$:
+\begin{equation}
+F_\alpha(A) \le F_\alpha(B)
+\end{equation}
+}
+
+\noindent\textit{Chứng minh.} Lấy tùy ý hai tập con $A \subseteq B \subseteq V$. Với mỗi chuỗi protein đích $v \in V$, vì $A \subseteq B$, ta có:
+\begin{equation}
+\label{eq:proof_subset_max}
+\max_{s \in A} \mathbf{S}(s, v) \le \max_{s \in B} \mathbf{S}(s, v)
+\end{equation}
+Do trọng số mẫu $w_v^{(\alpha)} = (n_{g(v)})^{-\alpha} > 0$ với mọi $v \in V$, nhân hai vế của bất đẳng thức~\eqref{eq:proof_subset_max} với $w_v^{(\alpha)}$ và lấy tổng trên toàn bộ $v \in V$:
+\begin{equation}
+\sum_{v \in V} w_v^{(\alpha)} \max_{s \in A} \mathbf{S}(s, v) \le \sum_{v \in V} w_v^{(\alpha)} \max_{s \in B} \mathbf{S}(s, v) \iff F_\alpha(A) \le F_\alpha(B)
+\end{equation}
+Bổ đề 2.1 được chứng minh. \hfill $\blacksquare$
+
+\noindent\refstepcounter{theorem}\textbf{Định lý \thetheorem: tính submodular của hàm mục tiêu $F_\alpha$.} \label{thm:submodularity} \textit{Với mọi hệ số $\alpha \ge 0$, hàm mục tiêu $F_\alpha: 2^V \to \mathbb{R}$ là một hàm submodular trên tập lũy thừa $2^V$, tức là với mọi $A \subseteq B \subseteq V$ và mọi phần tử $e \in V \setminus B$, ta luôn có:
+\begin{equation}
+\label{eq:theorem_submodularity}
+\Delta_\alpha(e \mid A) \ge \Delta_\alpha(e \mid B)
+\end{equation}
+trong đó $\Delta_\alpha(e \mid S) = F_\alpha(S \cup \{e\}) - F_\alpha(S)$ là độ tăng cận biên khi bổ sung phần tử $e$ vào tập $S$.}
+
+\noindent\textit{Chứng minh.} Với mỗi phần tử $v \in V$, xét hàm thành phần $f_v: 2^V \to \mathbb{R}$ định nghĩa bởi:
+\begin{equation}
+f_v(S) = \max_{s \in S} \mathbf{S}(s, v)
+\end{equation}
+với quy ước $f_v(\emptyset) = 0$. Độ tăng cận biên của hàm thành phần $f_v$ khi thêm phần tử $e$ vào tập $S$ được tính:
+\begin{align}
+\Delta f_v(e \mid S) &= f_v(S \cup \{e\}) - f_v(S) \nonumber \\
+&= \max\left(\max_{s \in S} \mathbf{S}(s, v), \, \mathbf{S}(e, v)\right) - \max_{s \in S} \mathbf{S}(s, v) \nonumber \\
+&= \max\left(0, \, \mathbf{S}(e, v) - \max_{s \in S} \mathbf{S}(s, v)\right)
+\label{eq:marginal_component}
+\end{align}
+
+Lấy tùy ý hai tập con $A \subseteq B \subseteq V$. Theo bất đẳng thức~\eqref{eq:proof_subset_max}, ta có $\max_{s \in A} \mathbf{S}(s, v) \le \max_{s \in B} \mathbf{S}(s, v)$, suy ra:
+\begin{equation}
+\mathbf{S}(e, v) - \max_{s \in A} \mathbf{S}(s, v) \ge \mathbf{S}(e, v) - \max_{s \in B} \mathbf{S}(s, v)
+\end{equation}
+Vì hàm $h(t) = \max(0, t)$ là hàm đơn điệu không giảm theo biến $t$, áp dụng vào biểu thức độ tăng cận biên tại công thức~\eqref{eq:marginal_component}:
+\begin{equation}
+\label{eq:component_submodularity}
+\Delta f_v(e \mid A) \ge \Delta f_v(e \mid B), \quad \forall v \in V
+\end{equation}
+Điều này chứng minh rằng mỗi hàm thành phần $f_v$ là một hàm submodular trên $2^V$.
+
+Hàm mục tiêu $F_\alpha(S) = \sum_{v \in V} w_v^{(\alpha)} f_v(S)$ là tổ hợp tuyến tính với các trọng số dương $w_v^{(\alpha)} = (n_{g(v)})^{-\alpha} > 0$. Do phép lấy vi phân rời rạc có tính tuyến tính, độ tăng cận biên của $F_\alpha$ thỏa mãn:
+\begin{equation}
+\label{eq:marginal_linear_combination}
+\Delta_\alpha(e \mid S) = \sum_{v \in V} w_v^{(\alpha)} \Delta f_v(e \mid S)
+\end{equation}
+Khi đó, với hai tập con bất kỳ $A \subseteq B \subseteq V$, xét hiệu số giữa hai độ tăng cận biên:
+\begin{equation}
+\label{eq:marginal_difference_submodularity}
+\Delta_\alpha(e \mid A) - \Delta_\alpha(e \mid B) = \sum_{v \in V} w_v^{(\alpha)} \left[ \Delta f_v(e \mid A) - \Delta f_v(e \mid B) \right]
+\end{equation}
+Do $w_v^{(\alpha)} > 0$ và $\Delta f_v(e \mid A) - \Delta f_v(e \mid B) \ge 0$ với mọi $v \in V$ theo bất đẳng thức~\eqref{eq:component_submodularity}, từng số hạng trong tổng ở vế phải của biểu thức~\eqref{eq:marginal_difference_submodularity} đều không âm. Suy ra:
+\begin{equation}
+\Delta_\alpha(e \mid A) - \Delta_\alpha(e \mid B) \ge 0 \iff \Delta_\alpha(e \mid A) \ge \Delta_\alpha(e \mid B)
+\end{equation}
+Bất đẳng thức này khẳng định hàm mục tiêu $F_\alpha$ thỏa mãn tính chất độ tăng cận biên giảm dần, tức $F_\alpha$ là hàm submodular trên $2^V$. Định lý 2.1 được chứng minh. \hfill $\blacksquare$
+
+\noindent\refstepcounter{corollary}\textbf{Hệ quả \thecorollary: bảo đảm cận xấp xỉ Nemhauser cho hàm mục tiêu có trọng số.} \label{cor:nemhauser_guarantee} \textit{Vì $F_\alpha$ là hàm chuẩn hóa $F_\alpha(\emptyset) = 0$, đơn điệu không giảm theo bổ đề~\ref{lem:monotonicity} và submodular theo định lý~\ref{thm:submodularity}, theo định lý Nemhauser, Wolsey và Fisher~\cite{nemhauser1978}, giải thuật tham lam khi áp dụng trên hàm $F_\alpha$ dưới ràng buộc lực lượng $|S| \le k$ luôn thu được tập đại diện $S_k$ thỏa mãn:
+\begin{equation}
+\label{eq:nemhauser_guarantee_alpha}
+F_\alpha(S_k) \ge \left(1 - \frac{1}{e}\right) F_\alpha(S_k^*) \approx 63{,}2\% \times F_\alpha(S_k^*)
+\end{equation}
+với $S_k^*$ là tập nghiệm tối ưu toàn cục.}
+
+Hệ quả 2.1 xác lập cơ sở toán học cho mô hình: việc đưa thêm trọng số phân họ vẫn giữ nguyên bảo đảm lý thuyết cận xấp xỉ $(1 - 1/e) \approx 63{,}2\%$ của giải thuật tham lam chuẩn khi tối ưu hóa trực tiếp hàm mục tiêu nội tại $F_\alpha(S)$. Cần phân định rõ rằng trong quy trình thực nghiệm, do áp dụng giải thuật tham lam cắt tỉa Pruned Greedy 90\% ($\theta = 0{,}90$) kết hợp cơ chế lấy top-$k$ theo tần suất đồng thuận qua $1.000$ vòng xáo trộn tại thuật toán~\ref{alg:gpu_pruned_greedy} và đánh giá bằng công cụ Live BLASTp độc lập ($E \le 10^{-7}$), quy trình thực thi là một xấp xỉ heuristic thực nghiệm; cận $(1 - 1/e)$ đóng vai trò là cơ sở lý thuyết cho việc lựa chọn lớp hàm submodular chứ không phải cận bảo đảm cứng cho nghiệm cắt tỉa.
+
+\section{Module khảo sát không gian tương đồng ngữ nghĩa qua mô hình ESM-2}
+\label{sec:methodology_esm2_centering}
+
+Bên cạnh việc đổi mới hàm mục tiêu tối ưu hóa, đề tài thiết lập một module khảo sát mở rộng nhằm đánh giá khả năng chuyển dịch không gian tương đồng từ so khớp ký tự chuỗi sơ cấp sang không gian hình học liên tục thông qua mô hình ngôn ngữ protein tiền huấn luyện ESM-2 kết hợp kỹ thuật dịch tâm Mean-Centering. Khảo sát này nhằm mục đích làm rõ: liệu việc bổ sung thông tin biểu diễn ngữ nghĩa sâu từ mô hình ngôn ngữ lớn có giúp cải thiện thêm năng lực bao phủ các phân họ hiếm so với không gian tương đồng chuỗi truyền thống hay không.
+
+\subsection{Trích xuất vector nhúng mức chuỗi qua mô hình ESM-2}
+\label{subsec:esm2_extraction}
+
+Mô hình ESM-2 checkpoint facebook/esm2\_t12\_35M\_UR50D gồm $12$ tầng Transformer Encoder với chiều ẩn $d = 480$ và giới hạn ngữ cảnh $1.024$ token (tương ứng tối đa $1.022$ axit amin kèm hai token đặc biệt [CLS] và [EOS]). Mặc dù bộ tiền xử lý có thiết lập ngưỡng giới hạn độ dài chuỗi đầu vào, toàn bộ $4.120$ chuỗi của $V_{\text{curated}}$ đều có chiều dài $L_v \in [88, \, 526]\text{ aa}$, nhỏ hơn nhiều so với giới hạn $1.022$ axit amin nên $100\%$ chuỗi được mã hóa đầy đủ mà không bị cắt bớt đầu C-terminus. Với mỗi chuỗi protein hợp lệ $v \in V_{\text{curated}}$ có chiều dài $L_v$ axit amin, chuỗi được mã hóa thành dãy token và đưa qua mạng:
+\begin{equation}
+H_v = \operatorname{ESM-2}(v) = [h_{v, 1}, h_{v, 2}, \dots, h_{v, L_v}] \in \mathbb{R}^{L_v \times 480}
+\end{equation}
+Để tổng hợp toàn bộ thông tin cấu trúc và hóa sinh của protein thành một vector đặc trưng duy nhất, kỹ thuật gộp trung bình theo chiều dài chuỗi được áp dụng:
+\begin{equation}
+\label{eq:sequence_mean_pooling}
+z_v = \frac{1}{L_v} \sum_{i=1}^{L_v} h_{v, i} \in \mathbb{R}^{480}
+\end{equation}
+
+Vector $z_v$ đóng vai trò là điểm tọa độ của protein $v$ trong không gian biểu diễn ngữ nghĩa liên tục $\mathbb{R}^{480}$.
+
+\subsection{Kỹ thuật dịch tâm có kiểm soát Mean-Centering với \texorpdfstring{$\beta = 0{,}70$}{beta = 0.70}}
+\label{subsec:mean_centering_technique}
+
+Như đã chỉ ra ở mục~\ref{subsec:representation_anisotropy}, không gian nhúng của các mô hình ngôn ngữ lớn luôn chịu hiện tượng co cụm vector~\cite{ethayarajh2019}: các vector $z_v$ bị co cụm về một góc nón hẹp quanh vector tâm lệch $\mu \neq \mathbf{0}$, đẩy độ tương đồng cosine trần lên dải hẹp $[0{,}85, \, 0{,}98]$.
+
+Để khôi phục tính đẳng hướng hình học và mở rộng dải phân giải khoảng cách cho giải thuật tối ưu hóa, RareProtSelect áp dụng kỹ thuật dịch tâm có kiểm soát Mean-Centering với hệ số $\beta = 0{,}70$:
+
+\begin{enumerate}
+    \item \textbf{Tính vector trung bình toàn cục}: xác định tọa độ trọng tâm của toàn bộ tập dữ liệu phân họ chính thức $V_{\text{curated}}$:
+    \begin{equation}
+    \label{eq:global_centroid}
+    \mu = \frac{1}{|V|} \sum_{v \in V} z_v \in \mathbb{R}^{480} \quad (|V| = 4.120)
+    \end{equation}
+    
+    \item \textbf{Dịch tâm có kiểm soát và chuẩn hóa $L_2$}: tịnh tiến mỗi vector nhúng $z_v$ theo hướng ngược vector tâm với tỷ lệ $\beta = 0{,}70$, rồi chuẩn hóa vector kết quả về độ dài đơn vị:
+    \begin{equation}
+    \label{eq:centered_vector_normalized}
+    z'_v(\beta) = \frac{z_v - \beta \mu}{\|z_v - \beta \mu\|_2 + \epsilon} \in \mathbb{R}^{480}
+    \end{equation}
+    trong đó $\epsilon = 10^{-12}$ là hằng số bảo vệ chống chia cho 0, bảo đảm $\|z'_v(\beta)\|_2 = 1{,}0$.
+    
+    \item \textbf{Xây dựng ma trận cosine không âm}: ma trận tương đồng ngữ nghĩa $\mathbf{S}_{\text{ESM}}^{(\beta)} \in [0, 1]^{|V| \times |V|}$ được tính qua tích vô hướng giữa các vector đã chuẩn hóa:
+    \begin{equation}
+    \label{eq:esm_matrix_definition}
+    \mathbf{S}_{\text{ESM}}^{(\beta)}(u, v) = \max\left(0{,}0, \, {z'_u(\beta)}^\top z'_v(\beta)\right)
+    \end{equation}
+    với đường chéo tự nhận dạng $\mathbf{S}_{\text{ESM}}^{(\beta)}(v, v) = 1{,}0$.
+\end{enumerate}
+
+Lý do chọn $\beta = 0{,}70$: phép dịch tâm toàn phần ($\beta = 1{,}0$) có thể làm mất các đặc trưng bảo tồn chung của siêu họ Peptidase A1 và khuếch đại nhiễu từ các chiều có phương sai nhỏ. Việc chọn $\beta = 0{,}70$ giữ lại đúng $30\%$ thành phần trung tâm, vừa kéo dải tương đồng về khoảng rộng $[0{,}0, \, 1{,}0]$, phân biệt rõ các Subfamily khác biệt, vừa bảo tồn dấu hiệu nhận diện enzyme học của siêu họ theo thuật toán~\ref{alg:mean_centering}.
+
+\begin{algorithm}[htbp!]
+\caption{Kỹ thuật dịch tâm Mean-Centering có kiểm soát trên vector nhúng ESM-2}
+\label{alg:mean_centering}
+\begin{algorithmic}[1]
+\Require Tập vector nhúng mức chuỗi $\{z_v\}_{v \in V} \subset \mathbb{R}^d$, hệ số dịch tâm $\beta \in [0{,}0, \, 1{,}0]$, hằng số $\epsilon = 10^{-12}$.
+\Ensure Ma trận tương đồng ngữ nghĩa liên tục $\mathbf{S}_{\text{ESM}}^{(\beta)} \in [0, 1]^{|V| \times |V|}$.
+\State $N \gets |V|$
+\State $\mu \gets \frac{1}{N} \sum_{v \in V} z_v$ \Comment{Tính vector trung bình của tập dữ liệu}
+\For{mỗi chuỗi $v \in V$}
+    \State $\tilde{z}_v \gets z_v - \beta \mu$ \Comment{Tịnh tiến dịch tâm có kiểm soát}
+    \State $z'_v \gets \frac{\tilde{z}_v}{\|\tilde{z}_v\|_2 + \epsilon}$ \Comment{Chuẩn hóa độ dài đơn vị $L_2$}
+\EndFor
+\State Khởi tạo ma trận $\mathbf{S}_{\text{ESM}} \in \mathbb{R}^{N \times N}$
+\For{mỗi cặp $(u, v) \in V \times V$}
+    \If{$u = v$}
+        \State $\mathbf{S}_{\text{ESM}}(u, v) \gets 1{,}0$ \Comment{Đường chéo tự nhận dạng}
+    \Else
+        \State $\text{dot\_prod} \gets {z'_u}^\top z'_v$
+        \State $\mathbf{S}_{\text{ESM}}(u, v) \gets \max(0{,}0, \, \text{dot\_prod})$ \Comment{Ngưỡng chặn không âm}
+    \EndIf
+\EndFor
+\State \Return $\mathbf{S}_{\text{ESM}}$
+\end{algorithmic}
+\end{algorithm}
+
+Thực nghiệm kiểm chuẩn trên tập dữ liệu phân họ chính thức $V_{\text{curated}}$ cho thấy phép dịch tâm với $\beta = 0{,}70$ giúp giảm độ tương đồng trung bình ngoài đường chéo từ $0{,}9547$ xuống $0{,}6578$, tách các vector nhúng ra khỏi vùng co cụm cục bộ. Đồng thời, phân bố giá trị tương đồng được mở rộng từ vùng co cụm hẹp $[0{,}85, \, 0{,}98]$ sang khoảng $[\min, \, \max]$ đạt $[0{,}0000, \, 0{,}9999]$, trải đều toàn bộ dải đo và giúp giải thuật phân biệt rõ các Subfamily.
+
+\section{Giải thuật tối ưu hóa Pruned Greedy 90\% trên GPU}
+\label{sec:methodology_gpu_pruned_greedy}
+
+Để giải bài toán tối ưu hóa submodular có trọng số trên tập dữ liệu $|V| = 4.120$ chuỗi với thời gian thực thi tối ưu, RareProtSelect kế thừa khung giải thuật Pruned Greedy 90\% kết hợp 1.000 lần xáo trộn ngẫu nhiên của bài báo nền~\cite{nguyen2025}, đồng thời vector hóa phép tính ma trận trên phần cứng GPU PyTorch CUDA.
+
+\subsection{Cơ chế cắt tỉa cứng Pruned Greedy 90\%}
+\label{subsec:pruning_mechanism}
+
+Giải thuật tham lam chuẩn đòi hỏi duyệt qua toàn bộ các ứng viên chưa chọn tại mỗi bước lặp. Tuy nhiên, trong các họ protein lớn, luôn tồn tại nhiều chuỗi có độ tương đồng rất cao ($\ge 90\%$). Khi một chuỗi đại diện $e^*$ đã được chọn, việc tiếp tục xem xét các chuỗi gần như giống hệt $e^*$ là không cần thiết và gây lãng phí tính toán.
+
+Cơ chế cắt tỉa cứng 90\% hoạt động như sau: ngay sau khi ứng viên $e^*$ được lựa chọn vào tập nghiệm $S$, thuật toán tiến hành duyệt tập ứng viên còn lại $C$ và loại bỏ lập tức mọi phần tử $s \in C$ thỏa mãn:
+\begin{equation}
+\label{eq:pruning_condition}
+\mathbf{S}(e^*, s) \ge 0{,}90
+\end{equation}
+Tập ứng viên cho bước tiếp theo được thu hẹp còn:
+\begin{equation}
+C_{t+1} = \{s \in C_t \setminus \{e^*\} \mid \mathbf{S}(e^*, s) < 0{,}90\}
+\end{equation}
+
+Cơ chế này vừa tăng tốc độ hội tụ của thuật toán, vừa định hướng tập đại diện phân tán đều trên không gian chuỗi protein thay vì co cụm cục bộ.
+
+\subsection{Kỹ thuật cập nhật vector bao phủ lũy tích trực tiếp trên GPU}
+\label{subsec:incremental_gain}
+
+Tính toán lại độ tăng cận biên $\Delta_\alpha(u \mid S)$ theo toàn bộ tập dữ liệu $V$ tại mỗi bước lặp đòi hỏi chi phí $O(|V| \cdot |C|)$, rất tốn kém khi thực hiện tuần tự. Nhằm giảm chi phí tính toán này, RareProtSelect thiết lập kỹ thuật cập nhật vector bao phủ lũy tích trực tiếp trên VRAM GPU:
+
+\begin{enumerate}
+    \item \textbf{Vector bao phủ cực đại lũy tích}: duy trì vector $\mathbf{m}^{(t)} \in \mathbb{R}^{|V|}$ lưu giữ độ tương đồng lớn nhất mà mỗi chuỗi $v \in V$ nhận được từ tập đại diện đã chọn $S_t$:
+    \begin{equation}
+    m_v^{(t)} = \max_{s \in S_t} \mathbf{S}(s, v), \quad m_v^{(0)} = 0{,}0 \quad (\forall v \in V)
+    \end{equation}
+    
+    \item \textbf{Vector độ tăng tương đồng và độ tăng cận biên}: với mỗi ứng viên $u \in C_t$, phần độ tương đồng tăng thêm mà $u$ đóng góp cho chuỗi $v$ được xác định bởi vector độ tăng tương đồng $\boldsymbol{\delta}_u^{(t)} \in \mathbb{R}^{|V|}$ với $\delta_{u, v}^{(t)} = \max\left(0{,}0, \, \mathbf{S}(u, v) - m_v^{(t)}\right)$. Khi đó, độ tăng cận biên của hàm mục tiêu chính là tích vô hướng giữa $\mathbf{w}^{(\alpha)}$ và $\boldsymbol{\delta}_u^{(t)}$:
+    \begin{equation}
+    \Delta_\alpha(u \mid S_t) = \langle \mathbf{w}^{(\alpha)}, \, \boldsymbol{\delta}_u^{(t)} \rangle = \sum_{v \in V} w_v^{(\alpha)} \max\left(0{,}0, \, \mathbf{S}(u, v) - m_v^{(t)}\right)
+    \end{equation}
+    
+    \item \textbf{Cập nhật vector bao phủ lũy tích sau mỗi bước}: khi ứng viên $e^*$ được lựa chọn vào $S_{t+1}$, vector $\mathbf{m}$ được cập nhật song song trên GPU:
+    \begin{equation}
+    m_v^{(t+1)} = \max\left(m_v^{(t)}, \, \mathbf{S}(e^*, v)\right), \quad \forall v \in V
+    \end{equation}
+    Nhờ đó, thuật toán chỉ cần thực hiện phép trừ mảng và hàm kích hoạt ReLU trên GPU, đạt tốc độ xử lý hàng trăm nghìn phép tính mỗi giây.
+\end{enumerate}
+
+\subsection{Cơ chế xác lập thứ hạng đồng thuận qua 1.000 vòng xáo trộn}
+\label{subsec:consensus_ranking}
+
+\begin{algorithm}[t]
+\caption{Giải thuật Pruned Greedy 90\% trên GPU với cơ chế xác lập thứ hạng đồng thuận 1.000 lần xáo trộn}
+\label{alg:gpu_pruned_greedy}
+\small
+\begin{algorithmic}[1]
+\Require Ma trận tương đồng $\mathbf{S} \in [0, 1]^{N \times N}$, vector trọng số $\mathbf{w} \in \mathbb{R}^N$, ngân sách tối đa $k_{\max}$, số lần xáo trộn $M = 1.000$, ngưỡng cắt tỉa $\theta = 0{,}90$.
+\Ensure Danh sách đại diện đồng thuận toàn cục $S_{\text{consensus}}$.
+\State Khởi tạo bảng lưu trữ tần suất $\text{Count}[v] \gets 0$ và tổng thứ hạng $\text{RankSum}[v] \gets 0$ với mọi $v \in V$
+\For{$m \gets 1$ \textbf{to} $M$}
+    \State $\pi_m \gets \text{RandomPermutation}(V)$ \Comment{Xáo trộn ngẫu nhiên thứ tự ứng viên}
+    \State $C \gets \pi_m$, \quad $S \gets \emptyset$, \quad $m_v \gets 0 \; (\forall v \in V)$
+    \State $t \gets 1$
+    \While{$|S| < k_{\max}$ \textbf{và} $C \neq \emptyset$}
+        \State Tính song song trên GPU vector độ tăng cận biên:
+        \Statex \qquad\quad $\Delta(u) \gets \sum_{v \in V} w_v \max\left(0, \, \mathbf{S}(u, v) - m_v\right) \quad (\forall u \in C)$
+        \State $e^* \gets \arg\max_{u \in C} \Delta(u)$ \Comment{Chọn ứng viên mang độ tăng cực đại}
+        \State $S \gets S \cup \{e^*\}$
+        \State $\text{Count}[e^*] \gets \text{Count}[e^*] + 1$
+        \State $\text{RankSum}[e^*] \gets \text{RankSum}[e^*] + t$
+        \State $m_v \gets \max(m_v, \, \mathbf{S}(e^*, v)) \quad (\forall v \in V)$ \Comment{Cập nhật vector bao phủ}
+        \State $C \gets \{u \in C \setminus \{e^*\} \mid \mathbf{S}(e^*, u) < \theta\}$ \Comment{Cắt tỉa cứng 90\%}
+        \State $t \gets t + 1$
+    \EndWhile
+\EndFor
+\State Sắp xếp toàn bộ $v \in V$ có $\text{Count}[v] > 0$ theo thứ tự:
+\Statex \qquad\quad Giảm dần theo $\text{Count}[v]$, nếu bằng nhau thì xếp tăng dần theo $\text{RankSum}[v]$
+\State $S_{\text{consensus}} \gets \text{Danh sách các chuỗi sau khi sắp xếp}$
+\State \Return $S_{\text{consensus}}$
+\end{algorithmic}
+\end{algorithm}
+
+Do ma trận tương đồng rời rạc hoặc ma trận ngữ nghĩa có thể xuất hiện các ứng viên có độ tăng cận biên bằng nhau tại một bước lặp, thứ tự duyệt mảng ứng viên ban đầu sẽ quyết định chuỗi nào được chọn. Hiện tượng này khiến kết quả tham lam đơn lẻ dễ bị nhiễu do thứ tự nhập dữ liệu.
+
+Để khắc phục sự phụ thuộc vào thứ tự duyệt này, RareProtSelect áp dụng cơ chế xác lập thứ hạng đồng thuận qua $M = 1.000$ lần xáo trộn ngẫu nhiên:
+
+\begin{enumerate}
+    \item Với mỗi vòng lặp $m \in \{1, 2, \dots, M\}$:
+    \begin{itemize}
+        \item Sinh một hoán vị ngẫu nhiên $\pi_m$ của danh sách định danh chuỗi protein.
+        \item Chạy giải thuật Pruned Greedy 90\% theo thứ tự hoán vị $\pi_m$ để chọn ra danh sách đại diện có thứ tự với kích thước ngân sách tối đa $k_{\max}$:
+        \begin{equation}
+        S^{(m)} = [s_1^{(m)}, s_2^{(m)}, \dots, s_{k_{\max}}^{(m)}]
+        \end{equation}
+        trong đó $k_{\max}$ là tham số ngân sách cấu hình, điển hình như $k_{\max} = 115$ ở các thử nghiệm đối chuẩn cơ sở và có thể mở rộng linh hoạt trong các phân tích bão hòa ngân sách.
+        \item Ghi nhận thứ hạng $\text{rank}_m(s_j^{(m)}) = j$ với mỗi chuỗi được chọn.
+    \end{itemize}
+    
+    \item \textbf{Tổng hợp ma trận đồng thuận}: sau $1.000$ vòng độc lập, với mỗi chuỗi protein $v \in V$, tính toán hai chỉ số thống kê:
+    \begin{itemize}
+        \item \textbf{Tần suất xuất hiện}: số lần chuỗi $v$ được chọn qua $M$ vòng:
+        \begin{equation}
+        C(v) = \sum_{m=1}^M \mathbb{I}\left(v \in S^{(m)}\right)
+        \end{equation}
+        \item \textbf{Tổng thứ hạng}: tổng vị trí thứ hạng của chuỗi $v$ trong các vòng được chọn:
+        \begin{equation}
+        R(v) = \sum_{m=1}^M \text{rank}_m(v) \cdot \mathbb{I}\left(v \in S^{(m)}\right)
+        \end{equation}
+    \end{itemize}
+    
+    \item \textbf{Xác lập thứ tự đồng thuận toàn cục}: sắp xếp toàn bộ các chuỗi đã từng được chọn theo thứ tự ưu tiên:
+    \begin{equation}
+    \label{eq:consensus_ordering}
+    u \succ v \iff \Big(C(u) > C(v)\Big) \lor \Big(C(u) = C(v) \land R(u) < R(v)\Big)
+    \end{equation}
+    Quy tắc này ưu tiên các chuỗi có tần suất xuất hiện cao nhất, và nếu hai chuỗi có tần suất bằng nhau thì chuỗi nào có tổng thứ hạng nhỏ hơn, tức được chọn ở các bước sớm hơn, sẽ đứng trước. Top $k$ chuỗi đầu tiên của danh sách đồng thuận cấu thành tập đại diện $S_k$. Cần lưu ý rằng do tần suất xuất hiện $C(v)$ được cộng dồn trên toàn bộ $k_{\max}$ bước của từng vòng xáo trộn, ngưỡng ngân sách tối đa $k_{\max}$ có ảnh hưởng trực tiếp đến thứ tự ưu tiên của danh sách đồng thuận: khi tăng $k_{\max}$ từ $115$ lên $380$, các đại diện phụ của những Subfamily lớn xuất hiện ổn định ở các bước $116..380$ sẽ đạt $C(v) = 1.000$ và có thể xếp trên một số ứng viên nhóm hiếm chỉ xuất hiện ở bước $50..115$ trong ít hơn $1.000$ vòng, tạo ra sự dịch chuyển nhẹ tại lát cắt $k = 115$ như phân tích tại mục~\ref{subsec:branch6_deep_budget}.
+\end{enumerate}
+
+\medskip
+\noindent\textbf{Tổng hợp thuật toán hoàn chỉnh}: toàn bộ quy trình tối ưu hóa song song trên GPU kết hợp cơ chế xác lập thứ hạng đồng thuận được chuẩn hóa chi tiết tại thuật toán~\ref{alg:gpu_pruned_greedy}.
+
+
+\FloatBarrier
+\section{Khung đánh giá khoa học và cơ chế bao phủ nội phân họ}
+\label{sec:methodology_evaluation}
+
+Để đánh giá chính xác năng lực bảo tồn đa dạng sinh học và loại bỏ các sai số phương pháp luận của nghiên cứu nền tảng, RareProtSelect thiết lập khung đo đạc dựa trên cơ chế bao phủ nội phân họ Within-Subfamily Coverage cùng hệ thống thước đo định lượng.
+
+\subsection{Cơ chế kiểm soát ranh giới nội phân họ Within-Subfamily Coverage}
+\label{subsec:within_subfamily_mechanism}
+
+Trong nghiên cứu nền tảng~\cite{nguyen2025}, quy trình đánh giá thực nghiệm gộp toàn bộ $k$ chuỗi đại diện vào một tệp truy vấn đa chuỗi và thực hiện phép tìm kiếm tương đồng Live BLASTp đối soát trên toàn bộ cơ sở dữ liệu. Thao tác đối soát toàn cục này đánh giá khả năng nhận diện chuỗi tương đồng trên toàn bộ họ Family A1, nhưng dẫn tới sai lệch bao phủ chéo ngoài ranh giới phân họ khi mục tiêu là bảo tồn tính đại diện sinh học của từng Subfamily: một chuỗi đại diện thuộc Subfamily lớn A01.009 có thể tạo hit so khớp với các chuỗi thuộc Subfamily hiếm A01.012 tại các motif tâm hoạt động bảo tồn chung của Clan AA aspartic peptidase ($E \le 10^{-7}$), dù trên thực tế không có bất kỳ đại diện trực tiếp nào của Subfamily hiếm được lựa chọn.
+
+Nhằm loại bỏ sai lệch bao phủ chéo này, RareProtSelect thiết lập cơ chế bao phủ nội phân họ Within-Subfamily Coverage:
+\begin{enumerate}
+    \item Gọi $S_k$ là tập $k$ chuỗi đại diện đầu tiên trong danh sách đồng thuận. Với mỗi Subfamily $g \in \{1, 2, \dots, G\}$, tập đại diện thực sự thuộc về Subfamily $g$ là:
+    \begin{equation}
+    \label{eq:within_subfamily_reps}
+    S_{k, g} = S_k \cap V_g
+    \end{equation}
+    
+    \item Tập các chuỗi thuộc Subfamily $g$ được bảo vệ bởi đại diện cùng Subfamily:
+    \begin{equation}
+    \label{eq:within_subfamily_covered_set}
+    C_{k, g}^{\text{within}} = \left\{v \in V_g \;\middle|\; \exists s \in S_{k, g} : \operatorname{Match}(s, v)\right\}
+    \end{equation}
+    \noindent trong đó $\operatorname{Match}(s, v)$ là kết quả truy vấn Live BLASTp có hit hợp lệ với $E \le 10^{-7}$ trong không gian BLASTp hoặc đạt độ tương đồng ngữ nghĩa $\mathbf{S}_{\text{ESM}}^{(\beta)}(s, v) > 0$ trong không gian ESM-2.
+\end{enumerate}
+
+\noindent\textbf{Khẳng định bất biến cốt lõi}: nếu một Subfamily $g$ không sở hữu bất kỳ chuỗi đại diện nào trong tập nghiệm ($S_{k, g} = \emptyset$), thì theo định nghĩa bắt buộc $C_{k, g}^{\text{within}} = \emptyset$, kéo theo tỷ lệ nhận diện chuỗi Live BLASTp, cũng như độ bao phủ ngữ nghĩa ESM, của Subfamily đó bằng đúng $0{,}0\%$. Cơ chế này ngăn chặn việc đại diện của Subfamily lớn bảo vệ thay thế cho Subfamily hiếm.
+
+\subsection{Hệ thống các chỉ số đo lường hiệu năng định lượng}
+\label{subsec:quantitative_metrics}
+
+Dựa trên cơ chế bao phủ nội phân họ, RareProtSelect thiết lập hệ thống $9$ chỉ số hiệu năng định lượng chia làm hai nhóm không gian đánh giá:
+
+\subsubsection{1. Bộ 5 chỉ số Within-Subfamily Live BLASTp Sensitivity ở ngưỡng $E \le 10^{-7}$}
+Đo đạc tỷ lệ nhận diện chuỗi thực tế qua công cụ NCBI BLASTp All-vs-All ở ngưỡng $E \le 10^{-7}$, đóng vai trò là thước đo sinh học thực nghiệm chuẩn mực:
+
+\begin{itemize}
+    \item \textbf{Tỷ lệ nhận diện nội phân họ của từng Subfamily $g$}:
+    \begin{equation}
+    \operatorname{Sensitivity}_g(S_k) = \frac{|C_{k, g}^{\text{within}}|}{|V_g|} \times 100\% \quad (g = 1, 2, \dots, 115)
+    \end{equation}
+    
+    \item \textbf{Chỉ số Overall Sensitivity}: tỷ lệ chuỗi được nhận diện nội phân họ qua Live BLASTp trên toàn bộ tập dữ liệu phân họ chính thức $|V| = 4.120$ chuỗi:
+    \begin{equation}
+    \label{eq:overall_sens_formula}
+    \operatorname{Overall\_Sensitivity}(S_k) = \frac{\sum_{g=1}^{115} |C_{k, g}^{\text{within}}|}{|V|} \times 100\%
+    \end{equation}
+    
+    \item \textbf{Chỉ số Worst-Group Sensitivity}: tỷ lệ nhận diện của Subfamily có kết quả thấp nhất trong toàn bộ Family A1, phản ánh năng lực bảo vệ trường hợp xấu nhất:
+    \begin{equation}
+    \label{eq:worst_sens_formula}
+    \operatorname{Worst\text{-}Group\_Sensitivity}(S_k) = \min_{g \in \{1, \dots, 115\}} \operatorname{Sensitivity}_g(S_k)
+    \end{equation}
+    Chỉ số này mang đặc tính hàm bậc thang: khi trong tập nghiệm vẫn còn ít nhất một Subfamily chưa có chuỗi đại diện trực tiếp ($\operatorname{Zero\text{-}Sensitivity\_Count}(S_k) \ge 1$), giá trị $\operatorname{Worst\text{-}Group\_Sensitivity}(S_k)$ luôn bằng đúng $0{,}0\%$.
+    
+    \item \textbf{Chỉ số Rare Sensitivity}: trung bình tỷ lệ nhận diện của $45$ Subfamily hiếm ($n_g \le 5$):
+    \begin{equation}
+    \label{eq:rare_sens_formula}
+    \operatorname{Rare\_Sensitivity}(S_k) = \frac{1}{|G_{\text{rare}}|} \sum_{g \in G_{\text{rare}}} \operatorname{Sensitivity}_g(S_k) \quad (|G_{\text{rare}}| = 45)
+    \end{equation}
+    Trong $45$ Subfamily hiếm, có $18$ Subfamily đơn độc ($n_g = 1$, chiếm $40{,}0\%$) và $27$ Subfamily có quy mô từ $2$ đến $5$ chuỗi ($60{,}0\%$). Với $18$ Subfamily đơn độc, tỷ lệ nhận diện nhận giá trị nhị phân $\{0\%, 100\%\}$ do đại diện duy nhất tự nhận diện chính nó; còn với $27$ Subfamily có $2..5$ chuỗi, chỉ số phản ánh khả năng đại diện lan tỏa bao phủ các thành viên cùng phân họ.
+    
+    \item \textbf{Chỉ số Macro-Average Sensitivity}: trung bình tỷ lệ nhận diện trên $115$ Subfamily:
+    \begin{equation}
+    \label{eq:macro_sens_formula}
+    \operatorname{Macro\text{-}Average\_Sensitivity}(S_k) = \frac{1}{115} \sum_{g=1}^{115} \operatorname{Sensitivity}_g(S_k)
+    \end{equation}
+    
+    \item \textbf{Chỉ số Zero-Sensitivity Count}: số lượng Subfamily không có chuỗi thành viên nào được nhận diện qua Live BLASTp, tức đạt mức $0{,}0\%$ Sensitivity:
+    \begin{equation}
+    \operatorname{Zero\text{-}Sensitivity\_Count}(S_k) = \Big|\left\{g \in \{1, \dots, 115\} \;\middle|\; \operatorname{Sensitivity}_g(S_k) = 0{,}0\%\right\}\Big|
+    \end{equation}
+\end{itemize}
+
+\subsubsection{2. Bộ 4 chỉ số Within-Subfamily Coverage ESM}
+Đo đạc độ bao phủ hình học ngữ nghĩa liên tục trên ma trận $\mathbf{S}_{\text{ESM}}^{(\beta=0{,}70)}$, đóng vai trò là hệ thống thước đo hình học bổ trợ phục vụ module khảo sát mở rộng:
+
+\begin{itemize}
+    \item \textbf{Điểm bao phủ ngữ nghĩa nội phân họ của chuỗi $v \in V_g$}:
+    \begin{equation}
+    c_v^{\text{within}}(S_k) = \begin{cases}
+    0{,}0 & \text{nếu } S_k \cap V_g = \emptyset \\
+    \displaystyle\max_{s \in (S_k \cap V_g)} \mathbf{S}_{\text{ESM}}^{(\beta=0{,}70)}(s, v) & \text{nếu } S_k \cap V_g \neq \emptyset
+    \end{cases}
+    \end{equation}
+    
+    \item \textbf{Độ bao phủ ngữ nghĩa của Subfamily $g$}:
+    \begin{equation}
+    \operatorname{Coverage}_g(S_k) = \frac{1}{|V_g|} \sum_{v \in V_g} c_v^{\text{within}}(S_k) \times 100\%
+    \end{equation}
+    
+    \item \textbf{Các chỉ số tổng hợp tổng thể, biên cực tiểu, nhóm hiếm và vĩ mô}:
+    \begin{align}
+    \operatorname{Overall\_Coverage}_{\text{ESM}}(S_k) &= \frac{1}{|V|} \sum_{v \in V} c_v^{\text{within}}(S_k) \times 100\% \\
+    \operatorname{Worst\text{-}Group\_Coverage}_{\text{ESM}}(S_k) &= \min_{g \in \{1, \dots, 115\}} \operatorname{Coverage}_g(S_k) \\
+    \operatorname{Rare\_Coverage}_{\text{ESM}}(S_k) &= \frac{1}{45} \sum_{g \in G_{\text{rare}}} \operatorname{Coverage}_g(S_k) \\
+    \operatorname{Macro\text{-}Average\_Coverage}_{\text{ESM}}(S_k) &= \frac{1}{115} \sum_{g=1}^{115} \operatorname{Coverage}_g(S_k)
+    \end{align}
+\end{itemize}
+
+\subsection{Các chỉ số cấu trúc phân bổ đại diện trực tiếp và độ dư thừa}
+\label{subsec:allocation_metrics}
+
+Nhằm phân tích trực tiếp cơ chế phân bổ đại diện của các hàm mục tiêu có trọng số, RareProtSelect định nghĩa bộ $4$ chỉ số phân bổ bên trong tập nghiệm $S_k$:
+
+\begin{enumerate}
+    \item \textbf{Chỉ số Subfamily Representation Rate}: tỷ lệ phần trăm các Subfamily trong số $115$ Subfamily chính thức sở hữu ít nhất một đại diện trực tiếp nằm trong $S_k$:
+    \begin{equation}
+    \label{eq:subfamily_repr_rate}
+    \operatorname{Subfamily\_Representation\_Rate}(S_k) = \frac{|\{g \mid |S_k \cap V_g| \ge 1\}|}{115} \times 100\%
+    \end{equation}
+    
+    \item \textbf{Chỉ số Rare Representation Rate}: tỷ lệ phần trăm trong $45$ Subfamily hiếm ($n_g \le 5$) có đại diện trực tiếp trong $S_k$:
+    \begin{equation}
+    \label{eq:rare_repr_rate}
+    \operatorname{Rare\_Representation\_Rate}(S_k) = \frac{|\{g \in G_{\text{rare}} \mid |S_k \cap V_g| \ge 1\}|}{45} \times 100\%
+    \end{equation}
+    
+    \item \textbf{Chỉ số Subfamily Redundancy}: độ dư thừa phân bổ, tức tỷ lệ phần trăm các vị trí đại diện bị phân bổ lặp lại vào các Subfamily đã có đại diện:
+    \begin{equation}
+    \label{eq:subfamily_redundancy}
+    \operatorname{Subfamily\_Redundancy}(S_k) = \frac{k - |\{g \mid |S_k \cap V_g| \ge 1\}|}{k} \times 100\%
+    \end{equation}
+    Chỉ số này phản ánh tỷ lệ ngân sách phân bổ trùng lặp khi các nhóm khác chưa có đại diện.
+    
+    \item \textbf{Chỉ số Dominant A01.009 Share}: tỷ trọng ngân sách $k$ phân bổ cho Subfamily lớn nhất A01.009:
+    \begin{equation}
+    \label{eq:dominant_share}
+    \operatorname{Dominant\_A01.009\_Share}(S_k) = \frac{|S_k \cap V_{\text{A01.009}}|}{k} \times 100\%
+    \end{equation}
+\end{enumerate}
+
+\noindent\textbf{Tổng kết chương}: khung phương pháp luận toán học, kiến trúc xử lý dữ liệu và hệ thống đo đạc thiết lập trong chương~\ref{chap:methodology} là cơ sở để triển khai 6 thử nghiệm trong chương~\ref{chap:experiments}.

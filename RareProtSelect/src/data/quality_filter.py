@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
 
 from src.data.fasta_parser import ProteinRecord
 
@@ -106,7 +105,7 @@ def filter_proteins(
     max_len: int = 2000,
     max_ambiguous_ratio: float = 0.05,
     deduplicate: bool = True,
-) -> tuple[list[ProteinRecord], dict[str, Any]]:
+) -> tuple[list[ProteinRecord], dict[str, int | float]]:
     """Lọc bỏ các chuỗi rác, phân mảnh hoặc chứa quá nhiều ký tự lạ.
 
     Trả về: (Danh sách chuỗi sạch, Thống kê lọc QC).

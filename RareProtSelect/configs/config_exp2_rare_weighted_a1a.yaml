@@ -1,0 +1,41 @@
+# Cấu hình thực nghiệm Nhánh 2: Khảo sát Hàm Mục Tiêu Có Trọng Số Ưu Tiên Nhóm Hiếm (Rare-Aware Weighted Facility Location)
+# Thực hiện Công đoạn 2.1 - 2.4 trong Tài liệu 1 và Module 4.3 trong Tài liệu 2
+
+experiment_name: "exp2_rare_weighted_a1a"
+dataset_name: "MEROPS_A1A_curated"
+fasta_path: "../baseline_repo/MEROPS_A1A.fasta"
+output_dir: "outputs"
+
+# Tiền xử lý & lọc QC (Phương án 3B: Loại bỏ hoàn toàn khối [A01.UPA] / A01.Unknown)
+min_seq_len: 30
+max_seq_len: 2000
+max_ambiguous_ratio: 0.05
+rare_threshold: 5
+exclude_unknown_subfamilies: true
+
+# Cấu hình tính ma trận tương đồng NCBI BLASTp All-vs-All (khớp 100% Nhánh 1)
+blast_bin_path: "tools/blast/bin/blastp.exe"
+blast_similarity_matrix:
+  evalue: 0.05
+  max_target_seqs: 100
+  word_size: 3
+  num_threads: 24
+
+# Thuật toán: Pruned Greedy 90% kết hợp 1,000 vòng xáo trộn ngẫu nhiên
+algorithm_name: "Rare-Aware Pruned Greedy 90% (1,000-Shuffle Consensus, Within-Subfamily Query)"
+prune_threshold: 0.90
+num_shuffles: 1000
+seed: 42
+budget_per_shuffle: 115
+
+# Dải 3 mốc tham số alpha cốt lõi
+alphas: [0.0, 0.5, 1.0]
+
+# 20 mốc ngân sách đại diện chiến lược tiến tới tổng số 115 phân họ định danh
+budget_k_list: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 15, 20, 25, 30, 40, 50, 60, 75, 115]
+
+# Cấu hình Live BLASTp đo lường độ nhạy nội phân họ thực tế
+blast_live_coverage_evaluation:
+  evalue: 1.0e-7
+  max_target_seqs: 999999
+  num_threads: 24

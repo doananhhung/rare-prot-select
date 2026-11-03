@@ -6,13 +6,13 @@ import logging
 import time
 import numpy as np
 
-from src.selection.lazy_greedy import SelectionResult
+from src.selection.base import BaseSubmodularSelector, SelectionResult
 
 logger = logging.getLogger(__name__)
 
 
-class StandardGreedySelector:
-    """Bộ chọn tập đại diện tối ưu hóa Submodular Facility Location bằng Standard Greedy (Vét cạn O(k*n^2)).
+class StandardGreedySolver(BaseSubmodularSelector):
+    """Bộ giải tối ưu hóa Submodular Facility Location bằng Standard Greedy (Vét cạn O(k*n^2)).
 
     Cài đặt thuật toán Standard Greedy nguyên bản của bài báo nền (Nguyen et al., 2025).
     Được sử dụng làm chuẩn đối chứng trực diện 1-1 để chứng minh:
@@ -25,15 +25,19 @@ class StandardGreedySelector:
         sim_matrix: np.ndarray,
         weights: np.ndarray | None = None,
         seq_ids: list[str] | None = None,
+        prune_threshold: float | None = None,
     ) -> None:
         """Khởi tạo StandardGreedySelector.
 
         Args:
-            sim_matrix: Ma trận tương đồng Cosine không âm, kích thước (N, N), giá trị in [0, 1].
+            sim_matrix: Ma trận tương đồng Cosine hoặc Sequence Identity không âm, kích thước (N, N), giá trị in [0, 1].
             weights: Vector trọng số w_v không âm cho từng protein, kích thước (N,).
                      Nếu None, mặc định là vector trọng số đồng nhất 1.0 (Uniform).
             seq_ids: Danh sách định danh protein theo thứ tự hàng/cột.
                      Nếu None, mặc định là ['0', '1', ..., 'N-1'].
+            prune_threshold: Ngưỡng tương đồng cắt tỉa cứng (tùy chọn, ví dụ 0.90 theo Greedy.R).
+                             Nếu được thiết lập, sau khi chọn ứng viên tối ưu, mọi ứng viên j có
+                             sim_matrix[best, j] > prune_threshold sẽ bị loại bỏ khỏi tập xem xét tiếp theo.
         """
         if sim_matrix.ndim != 2 or sim_matrix.shape[0] != sim_matrix.shape[1]:
             raise ValueError(
@@ -42,6 +46,9 @@ class StandardGreedySelector:
 
         self.n: int = sim_matrix.shape[0]
         self.sim_matrix: np.ndarray = np.asarray(sim_matrix, dtype=np.float64)
+        self.prune_threshold: float | None = (
+            float(prune_threshold) if prune_threshold is not None else None
+        )
 
         if weights is None:
             self.weights: np.ndarray = np.ones(self.n, dtype=np.float64)
@@ -90,22 +97,23 @@ class StandardGreedySelector:
         marginal_gains: list[float] = []
         objective_history: list[float] = []
         selected_set: set[int] = set()
+        active_candidates: list[int] = list(range(self.n))
         total_evaluations = 0
 
         for step in range(effective_k):
+            if not active_candidates:
+                break
+
             best_candidate = -1
             best_gain = -1.0
 
-            for cand in range(self.n):
-                if cand in selected_set:
-                    continue
-
+            for cand in active_candidates:
                 diff = np.maximum(0.0, self.sim_matrix[:, cand] - current_max_sim)
                 gain = float(np.dot(self.weights, diff))
                 total_evaluations += 1
 
                 # Sử dụng strictly greater than để bảo đảm phá vỡ thế hòa (tie-breaking)
-                # luôn ưu tiên chỉ số nhỏ hơn, hoàn toàn nhất quán với Lazy Greedy Max-Heap.
+                # luôn ưu tiên chỉ số nhỏ hơn theo thứ tự xuất hiện ban đầu.
                 if gain > best_gain:
                     best_gain = gain
                     best_candidate = cand
@@ -120,6 +128,17 @@ class StandardGreedySelector:
             current_max_sim = np.maximum(current_max_sim, self.sim_matrix[:, best_candidate])
             current_obj = float(np.dot(self.weights, current_max_sim))
             objective_history.append(current_obj)
+
+            # Cắt tỉa cứng nếu prune_threshold được cấu hình (khớp 100% Greedy.R)
+            if self.prune_threshold is not None:
+                active_candidates = [
+                    c
+                    for c in active_candidates
+                    if c != best_candidate
+                    and self.sim_matrix[best_candidate, c] <= self.prune_threshold
+                ]
+            else:
+                active_candidates = [c for c in active_candidates if c != best_candidate]
 
         elapsed = time.perf_counter() - start_time
         selected_ids = [self.seq_ids[i] for i in selected_indices]
@@ -142,11 +161,16 @@ class StandardGreedySelector:
         )
 
 
+# Bí danh tương thích ngược (Backward compatibility alias)
+StandardGreedySelector = StandardGreedySolver
+
+
 def standard_greedy_facility_location(
     sim_matrix: np.ndarray,
     weights: np.ndarray,
     budget_k: int,
     seq_ids: list[str] | None = None,
+    prune_threshold: float | None = None,
 ) -> tuple[list[int], list[float], list[float]]:
     """Thuật toán Standard Greedy gốc (quét vét cạn O(k*n^2) mỗi bước).
 
@@ -157,6 +181,7 @@ def standard_greedy_facility_location(
         weights: Vector trọng số w_v kích thước (N,).
         budget_k: Ngân sách số phần tử cần chọn.
         seq_ids: Danh sách protein IDs (tùy chọn).
+        prune_threshold: Ngưỡng tương đồng cắt tỉa cứng (tùy chọn, ví dụ 0.90 theo Greedy.R).
 
     Returns:
         tuple[list[int], list[float], list[float]]:
@@ -164,6 +189,11 @@ def standard_greedy_facility_location(
             - marginal_gains: Lợi ích biên qua từng bước.
             - objective_values: Giá trị hàm mục tiêu F(S) tích lũy qua từng bước.
     """
-    selector = StandardGreedySelector(sim_matrix=sim_matrix, weights=weights, seq_ids=seq_ids)
+    selector = StandardGreedySelector(
+        sim_matrix=sim_matrix,
+        weights=weights,
+        seq_ids=seq_ids,
+        prune_threshold=prune_threshold,
+    )
     res = selector.select(budget_k=budget_k)
     return res.selected_indices, res.marginal_gains, res.objective_history

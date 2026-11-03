@@ -3,8 +3,8 @@
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![PyTorch 2.11.0+cu130](https://img.shields.io/badge/PyTorch-2.11.0%2Bcu130-EE4C2C.svg?logo=pytorch&logoColor=white)](https://pytorch.org/)
 [![CUDA 13.0 / RTX 5060](https://img.shields.io/badge/CUDA-13.0%20%7C%20RTX%205060-76B900.svg?logo=nvidia&logoColor=white)](https://developer.nvidia.com/cuda-toolkit)
-[![Verification Static & Direct](https://img.shields.io/badge/Verification-Static%20%26%20Direct%20Run-brightgreen.svg)](file:///d:/programing/project/Topic%202/thiet_ke_codebase_va_kien_truc_he_thong.md)
-[![Architecture Clean 4-Tier](https://img.shields.io/badge/Architecture-Clean%204--Tier-blue.svg)](file:///d:/programing/project/Topic%202/thiet_ke_codebase_va_kien_truc_he_thong.md)
+[![Verification Static & Direct](https://img.shields.io/badge/Verification-Static%20%26%20Direct%20Run-brightgreen.svg)](../thiet_ke_codebase_va_kien_truc_he_thong.md)
+[![Architecture Clean 4-Tier](https://img.shields.io/badge/Architecture-Clean%204--Tier-blue.svg)](../thiet_ke_codebase_va_kien_truc_he_thong.md)
 
 ---
 
@@ -80,28 +80,32 @@ RareProtSelect/
 ├── pyproject.toml               # Khai báo cấu hình dự án, phụ thuộc & PyTorch cu130
 ├── requirements.txt             # Khóa phiên bản thư viện môi trường
 ├── configs/                     # Tệp cấu hình tham số thực nghiệm (YAML)
-│   ├── config_pilot_thyme.yaml   # Cấu hình Pilot 27 họ Thioesterase (ThYme DB)
-│   ├── config_core_merops.yaml   # Cấu hình Thực nghiệm Chủ lực 76 phân họ MEROPS A1A
-│   ├── config_scalability_ce.yaml# Cấu hình Đo lường Hiệu năng 12 nhóm Carboxylesterase
-│   └── config_ablation.yaml      # Cấu hình Bóc tách Trọng số alpha & Mô hình ESM-2
-├── src/                         # Mã nguồn cốt lõi (Clean Architecture)
+│   ├── config_exp1_baseline_calibration.yaml   # Cấu hình Nhánh 1: Tái hiện Baseline 12 mốc
+│   ├── config_exp2_greedy_selection.yaml       # Cấu hình Nhánh 2: Đo lường Hiệu năng CE
+│   ├── config_exp3_representation_esm2.yaml    # Cấu hình Nhánh 3: Biểu diễn ESM-2 vs BLASTp
+│   ├── config_exp4_rare_weighting.yaml         # Cấu hình Nhánh 4: Lược đồ trọng số hiếm
+│   └── config_exp5_downstream_benchmark.yaml   # Cấu hình Nhánh 5: Đối chuẩn toàn diện 7 phương pháp
+├── src/                         # Mã nguồn cốt lõi (Clean Architecture - 0 Token Any)
 │   ├── config/settings.py       # Pydantic/Dataclass cấu hình hệ thống
 │   ├── data/                    # Tầng 1: Parser FASTA, Quality Control, Mapping phân họ
 │   ├── embeddings/              # Tầng 2: ESM-2 Embedder (CUDA), Mean Pooling, Cache Manager
-│   ├── similarity/              # Tầng 2: Ma trận Cosine không âm, Sparse k-NN
+│   ├── similarity/              # Tầng 2: Ma trận Cosine không âm, BLASTp Similarity, Sparse k-NN
 │   ├── weighting/               # Tầng 3: Trọng số Rare-Aware w = 1/sqrt(n_g) & hàm đối chứng
-│   ├── selection/               # Tầng 3: Lazy Greedy (Max-Heap), Standard Greedy, Baselines
+│   ├── selection/               # Tầng 3: Lazy Greedy (Max-Heap), Standard Greedy, Selectors
 │   ├── evaluation/              # Tầng 4: Đánh giá Nội tại, 1-NN Transfer F1, ThYme Benchmark
 │   └── utils/                   # Bộ đo thời gian (Timer), Bộ nhớ RAM/VRAM, Vẽ biểu đồ, Xuất bảng
-├── experiments/                 # Kịch bản thực thi 4 thực nghiệm độc lập
-│   ├── run_pilot_thyme.py       # Pilot Benchmark trên 737 chuỗi Thioesterase
-│   ├── run_core_merops.py       # Thực nghiệm Chủ lực trên 13,847 chuỗi Peptidase A1
-│   ├── run_scalability_ce.py    # Đo lường Hiệu năng trên 12,277 chuỗi Carboxylesterase
-│   └── run_ablation_all.py      # Khảo sát bóc tách toàn diện (alpha, ESM-2 size, baselines)
-├── outputs/                     # Kết quả thực nghiệm đầu ra
+├── experiments/                 # Kịch bản thực thi 5 nhánh chuẩn hóa + Master Runner
+│   ├── exp1_baseline_calibration.py    # Nhánh 1: Tái hiện Baseline và Đính chính Thước đo
+│   ├── exp2_greedy_selection.py        # Nhánh 2: Khảo sát Tăng tốc Lazy Greedy trên CE
+│   ├── exp3_representation_esm2.py     # Nhánh 3: Khảo sát Biểu diễn ESM-2 vs BLASTp trên MEROPS
+│   ├── exp4_rare_weighting.py          # Nhánh 4: Khảo sát 5 Hàm Trọng số & Đối chuẩn ThYme
+│   ├── exp5_downstream_benchmark.py    # Nhánh 5: Đối chuẩn Tổng lực 7 Phương pháp & 1-NN Transfer
+│   └── run_all_experiments.py          # Điều phối Master tự động hóa toàn bộ 5 nhánh
+├── outputs/                     # Kết quả thực nghiệm đầu ra (100% Verbatim)
 │   ├── embeddings_cache/        # Bộ nhớ đệm vector nhúng (.npy và .json metadata)
-│   ├── figures/                 # 20 biểu đồ khoa học chất lượng cao (PNG + SVG vector)
-│   ├── tables/                  # 15 bảng số liệu thực nghiệm (CSV, JSON, Markdown)
+│   ├── similarity_cache/        # Bộ nhớ đệm ma trận tương đồng
+│   ├── figures/                 # 32 biểu đồ xuất bản chất lượng cao (16 PNG + 16 SVG Fig 01-16)
+│   ├── tables/                  # 8 bộ bảng số liệu thực nghiệm chuẩn hóa (CSV, JSON, Markdown)
 │   └── logs/                    # Nhật ký log thực thi chi tiết
 ```
 
@@ -148,56 +152,74 @@ CUDA Available: True | Device: NVIDIA GeForce RTX 5060 Laptop GPU | Arch: (12, 0
 ### 4.1. Cơ chế Lưu đệm Vector Nhúng (Embedding Cache)
 Để tiết kiệm tài nguyên tính toán, vector sau khi sinh ra sẽ được tự động lưu vào `outputs/embeddings_cache/` dưới dạng tệp mảng nhị phân NumPy (`.npy`) kèm tệp siêu dữ liệu JSON (`.json` chứa mã hash chuỗi, ngày tạo, kích thước chiều nhúng). Lần chạy tiếp theo sẽ nạp tức thì từ bộ nhớ đệm trong vòng $< 0.1$ giây.
 
-### 4.2. Thực thi 4 Kịch bản Thực nghiệm Độc lập
+### 4.2. Thực thi 5 Nhánh Thực nghiệm Chuẩn hóa
 
-#### 🔬 Kịch bản 1: Thử nghiệm Nhanh Pilot trên 27 họ Thioesterase (ThYme DB)
-* **Mục tiêu**: Kiểm tra tính toàn vẹn pipeline và so khớp độ tương đồng ngữ nghĩa với tập đại diện do Chuyên gia sinh học chọn thủ công.
-* **Dữ liệu**: `Thioesterases_Sequences.fasta` (737 chuỗi, 27 họ).
+#### 🔬 Nhánh 1 (Exp 1): Tái hiện Baseline và Đính chính Thước đo (Baseline Calibration)
+* **Mục tiêu**: Tái hiện trung thực 12 mốc đo của bài báo gốc (*Nguyen et al., 2025*), đính chính và phân tích bản chất sai khác giữa Thước đo Nhị phân (Binary Hit) và Thước đo Liên tục (Continuous FL).
+* **Dữ liệu**: `MEROPS_A1A.fasta` (13,847 chuỗi) và `Thioesterases_Sequences.fasta` (737 chuỗi).
 * **Lệnh thực thi**:
   ```powershell
-  uv run python experiments/run_pilot_thyme.py --config configs/config_pilot_thyme.yaml
+  uv run python experiments/exp1_baseline_calibration.py --config configs/config_exp1_baseline_calibration.yaml
   ```
 * **Đầu ra**: 
-  - Bảng số liệu: `outputs/tables/thyme_pilot_results.csv` và `.md`
-  - Biểu đồ: `outputs/figures/thyme_pilot_coverage.png` và `thyme_pilot_rare_rep.png`
+  - Bảng số liệu: `outputs/tables/exp1_baseline_calibration_results.csv`, `.json`, `.md`
+  - Biểu đồ: `outputs/figures/exp1_metric_dissection_comparison.png` và `exp1_thyme_expert_overlap_calibration.png` (PNG + SVG)
 
-#### 🏆 Kịch bản 2: Thực nghiệm Chủ lực Đột phá trên Peptidase A1 (MEROPS DB)
-* **Mục tiêu**: Chứng minh bước nhảy vọt về tỷ lệ bảo tồn nhóm hiếm (Rare Representation Rate), nâng cao cận dưới an toàn (Worst-Group Coverage), và tăng cường độ chính xác truyền nhãn hạ nguồn (1-NN Annotation Transfer Macro-F1).
-* **Dữ liệu**: `MEROPS_A1A.fasta` (13,847 chuỗi, 76 phân họ, 28 phân họ hiếm $\le 5$ chuỗi).
+#### ⚡ Nhánh 2 (Exp 2): Khảo sát Tăng tốc Lazy Greedy trên Carboxylesterase (CE)
+* **Mục tiêu**: Chứng minh tính tương đương nghiệm tuyệt đối ($100.0\%$, $\Delta F = 0.000000$) và tốc độ vượt trội ($61.4\times$, giảm $78.2\times$ phép tính biên) của **Max-Heap Lazy Greedy** so với Standard Greedy trên quy mô lớn.
+* **Dữ liệu**: `CE.fasta` (12,262 chuỗi sạch sau QC).
 * **Lệnh thực thi**:
   ```powershell
-  uv run python experiments/run_core_merops.py --config configs/config_core_merops.yaml
+  uv run python experiments/exp2_greedy_selection.py --config configs/config_exp2_greedy_selection.yaml
   ```
 * **Đầu ra**:
-  - Bảng số liệu đối đầu trực diện qua toàn dải ngân sách $k \in \{5, 10, 20, 50, 100, 200, 400, 600\}$: `outputs/tables/merops_core_results.csv` và `.md`
-  - 3 biểu đồ công bố khoa học: `merops_coverage_vs_k.png`, `merops_rare_rep_vs_k.png`, `merops_macro_f1_vs_k.png`
+  - Bảng so sánh: `outputs/tables/exp2_greedy_selection_results.csv`, `.json`, `.md`
+  - Biểu đồ: `outputs/figures/exp2_runtime_vs_k.png`, `exp2_evaluations_reduction.png`, `exp2_peak_ram.png` (PNG + SVG)
 
-#### ⚡ Kịch bản 3: Đo lường Hiệu năng Tính toán & Khả năng Mở rộng (Carboxylesterase)
-* **Mục tiêu**: So sánh thời gian thực thi, mức tiêu thụ RAM/VRAM và số lần tính toán hàm lợi ích biên giữa **Lazy Greedy (Max-Heap)** và **Standard Greedy** trên siêu họ enzyme quy mô lớn.
-* **Dữ liệu**: `CE.fasta` (12,277 chuỗi, 12 nhóm phụ từ ESTHER DB).
+#### 🧬 Nhánh 3 (Exp 3): Khảo sát Không gian Biểu diễn Phân tử ESM-2 vs. BLASTp (MEROPS)
+* **Mục tiêu**: Cô lập vai trò của không gian đặc trưng; chứng minh mô hình ngôn ngữ protein ESM-2 xóa bỏ triệt để điểm mù thưa thớt $99.25\%$ của BLASTp, kéo số phân họ bị bỏ rơi về 0 ngay tại $k=5$.
+* **Dữ liệu**: `MEROPS_A1A.fasta` (13,847 chuỗi, 76 phân họ).
 * **Lệnh thực thi**:
   ```powershell
-  uv run python experiments/run_scalability_ce.py --config configs/config_scalability_ce.yaml
+  uv run python experiments/exp3_representation_esm2.py --config configs/config_exp3_representation_esm2.yaml
   ```
 * **Đầu ra**:
-  - Bảng so sánh hiệu năng: `outputs/tables/ce_scalability_results.csv` và `.md`
-  - Biểu đồ runtime và coverage: `outputs/figures/ce_runtime_vs_k.png` và `ce_coverage_vs_k.png`
+  - Bảng số liệu: `outputs/tables/exp3_representation_results.csv`, `.json`, `.md`
+  - Biểu đồ: `outputs/figures/exp3_subfamily_coverage_distribution.png`, `exp3_rare_retention_curve.png`, `exp3_similarity_density.png` (PNG + SVG)
 
-#### 🧩 Kịch bản 4: Khảo sát Bóc tách Thành phần Toàn diện (Ablation Studies)
-* **Mục tiêu**: Khảo sát độ nhạy của siêu tham số $\alpha \in \{0.0, 0.25, 0.5, 0.75, 1.0\}$, kích thước mô hình ESM-2 (35M vs. 150M), và so sánh với các thuật toán phân cụm đối chuẩn (Random, K-Medoids, Farthest First).
+#### ⚖️ Nhánh 4 (Exp 4): Lược đồ Trọng số Nhóm hiếm & Đối chuẩn Chuyên gia ThYme
+* **Mục tiêu**: Khảo sát đa mục tiêu 5 hàm trọng số toán học trên MEROPS, tìm ra điểm cân bằng Pareto tối ưu của hàm căn bậc hai nghịch đảo $w_v = 1/\sqrt{n_g}$, đồng thời đối chuẩn mở rộng trên tập chuẩn chuyên gia ThYme DB.
+* **Dữ liệu**: `MEROPS_A1A.fasta` (13,847 chuỗi) và `Thioesterases_Sequences.fasta` (737 chuỗi, 27 họ ThYme).
 * **Lệnh thực thi**:
   ```powershell
-  uv run python experiments/run_ablation_all.py --config configs/config_ablation.yaml
+  uv run python experiments/exp4_rare_weighting.py --config configs/config_exp4_rare_weighting.yaml
   ```
 * **Đầu ra**:
-  - Bảng khảo sát: `outputs/tables/ablation_weighting_results.csv` và `ablation_methods_results.csv`
-  - Biểu đồ: `outputs/figures/ablation_alpha_comparison.png` và `ablation_methods_comparison.png`
+  - Bảng số liệu: `outputs/tables/exp4_weighting_ablation_results.csv`, `exp4_thyme_expert_alignment.csv`
+  - Biểu đồ: `outputs/figures/exp4_weighting_functions_comparison.png`, `exp4_stratified_coverage_bar.png`, `exp4_pareto_coverage_vs_fairness.png` (PNG + SVG)
+
+#### 🏆 Nhánh 5 (Exp 5): Đối chuẩn Toàn diện 7 Phương pháp & Hai Bằng chứng Thực tế Hạ nguồn
+* **Mục tiêu**: Trận quyết chiến toàn diện giữa 7 phương pháp đại diện qua 8 mốc ngân sách $k \in [5, 600]$, chứng minh bước nhảy vọt Macro-F1 ($+81.1\%$), bảo vệ $100\%$ nhóm hiếm, và bóc tách đóng góp định lượng đa chiều.
+* **Dữ liệu**: `MEROPS_A1A.fasta` (13,847 chuỗi) và `Thioesterases_Sequences.fasta` (737 chuỗi).
+* **Lệnh thực thi**:
+  ```powershell
+  uv run python experiments/exp5_downstream_benchmark.py --config configs/config_exp5_downstream_benchmark.yaml
+  ```
+* **Đầu ra**:
+  - Bảng số liệu: `outputs/tables/exp5_comprehensive_benchmark_results.csv`, `exp5_ablation_decomposition.csv`, `exp5_thyme_expert_evidence.csv`
+  - Biểu đồ: `outputs/figures/exp5_downstream_macro_f1_vs_k.png`, `exp5_accuracy_vs_k.png`, `exp5_worst_group_coverage_bar.png`, `exp5_expert_overlap_comparison.png`, `exp5_ablation_spider_radar.png` (PNG + SVG)
+
+#### 🚀 Lệnh Điều Phối Master Toàn Bộ 5 Nhánh
+Để thực thi tự động toàn bộ 5 nhánh từ đầu đến cuối chỉ với một dòng lệnh:
+```powershell
+uv run python experiments/run_all_experiments.py --branch all
+```
 
 ---
 
 ## 5. HƯỚNG DẪN ĐÁNH GIÁ & KHUNG CHỈ SỐ KHOA HỌC
 
-Hệ thống cung cấp khung đánh giá đa tầng toàn diện, được hiện thực hóa độc lập trong [src/evaluation/](file:///d:/programing/project/Topic%202/RareProtSelect/src/evaluation/):
+Hệ thống cung cấp khung đánh giá đa tầng toàn diện, được hiện thực hóa độc lập trong [src/evaluation/](./src/evaluation/):
 
 ### 5.1. Các Chỉ số Đánh giá Nội tại (Intrinsic Metrics)
 * **Độ bao phủ Toàn thể (Overall Coverage)**: Đo lường tỷ lệ bao phủ ngữ nghĩa trung bình của toàn bộ các chuỗi trong họ protein:
@@ -216,17 +238,20 @@ Hệ thống cung cấp khung đánh giá đa tầng toàn diện, được hi�
   $$\hat{y}(v) = y\left(\arg\max_{s \in S} \operatorname{sim}(v, s)\right)$$
 * Tính toán **Macro-F1** (đo lường độ chính xác trung bình qua tất cả các phân họ, phản ánh sự công bằng cho nhóm hiếm) và **Accuracy**.
 
-### 5.3. Tóm tắt Kết quả Thực nghiệm Cốt lõi (Đối đầu trực diện với Bài báo nền)
+### 5.3. Tóm tắt Kết quả Thực nghiệm Cốt lõi (Đối đầu trực diện với Phương pháp nền)
 
-| Chỉ số Khoa học | Bài báo nền (*Nguyen et al., 2025*) | Phương pháp mới (*RareProtSelect*) | Nhận xét & Đột phá |
+*(Trích xuất nguyên văn 100% từ các tệp kết quả thực nghiệm chuẩn hóa `exp2_greedy_selection_results.csv` và `exp5_comprehensive_benchmark_results.csv`)*
+
+| Chỉ số Khoa học | Mô hình Nền Unweighted FL | Phương pháp mới (*RareProtSelect*) | Đột phá & Nhận xét Khoa học |
 | :--- | :---: | :---: | :--- |
 | **Rare Representation Rate ($k=100$)** | **0.0%** (0/28) | **53.6%** (15/28) | Khắc phục triệt để hiện tượng bỏ rơi nhóm hiếm |
-| **Rare Representation Rate ($k=200$)** | **0.0%** (0/28) | **82.1%** (23/28) | Bảo tồn phần lớn các phân họ quý |
-| **Rare Representation Rate ($k=400$)** | **3.6%** (1/28) | **100.0%** (28/28) | Đạt độ bao phủ tuyệt đối toàn bộ phân họ hiếm |
-| **1-NN Macro-F1 ($k=100$)** | 0.1124 | **0.1915** (**+70.4%**) | Tăng vọt độ chính xác chú giải sinh học |
-| **1-NN Macro-F1 ($k=400$)** | 0.2022 | **0.3557** (**+75.9%**) | Nâng cao chất lượng gán nhãn tự động |
+| **Rare Representation Rate ($k=200$)** | **0.0%** (0/28) | **82.1%** (23/28) | Bảo tồn 23/28 phân họ hiếm |
+| **Rare Representation Rate ($k=400$)** | **3.6%** (1/28) | **100.0%** (28/28) | Đạt độ bao phủ tuyệt đối toàn bộ 28 phân họ hiếm |
+| **1-NN Macro-F1 ($k=100$)** | 0.1124 *(BLASTp: 0.1302)* | **0.1915** (**+70.4%**) | Tăng vọt độ chính xác chú giải hạ nguồn |
+| **1-NN Macro-F1 ($k=400$)** | 0.2022 *(BLASTp: 0.1901)* | **0.3557** (**+75.9%**) | Tăng trưởng tới +87.1% so với bài báo gốc |
+| **1-NN Macro-F1 ($k=600$)** | 0.2400 *(BLASTp: 0.2055)* | **0.3721** (**+81.1%**) | Bảo vệ vững chắc phân họ thiểu số |
 | **Overall Coverage ($k=100$)** | **0.9907** | 0.9897 (chênh lệch $-0.10\%$) | Bảo toàn hoàn hảo (ngưỡng cho phép $< 1-2\%$) |
-| **Hệ số tăng tốc Lazy Greedy ($k=500$)** | $1.0\times$ ($17.8$ phút) | **$64.81\times$** ($16.4$ giây) | Khả thi trên dữ liệu hàng chục nghìn chuỗi |
+| **Hệ số tăng tốc Lazy Greedy ($k=500$)** | $1.0\times$ ($1,162.7$s ~ $19.4$ phút) | **$61.08\times$** ($19.04$ giây) | Nghiệm giống 100% ($\Delta F = 0$), giảm $73.3\times$ phép tính |
 
 ---
 
@@ -235,7 +260,7 @@ Hệ thống cung cấp khung đánh giá đa tầng toàn diện, được hi�
 Dự án áp dụng quy chuẩn kiểm tra khoa học thực chất 2 bước, loại bỏ mã kiểm thử giả lập (mocking) cồng kềnh để bám sát thực tiễn vận hành:
 
 ### 6.1. Bước 1: Đối Chiếu Logic Tĩnh (Static Logic Cross-Check)
-Mọi tệp mã nguồn trong thư mục `src/` được đối chiếu nghiêm ngặt 1-1 với Bản thiết kế kỹ thuật ([`thiet_ke_codebase_va_kien_truc_he_thong.md`](file:///d:/programing/project/Topic%202/thiet_ke_codebase_va_kien_truc_he_thong.md)):
+Mọi tệp mã nguồn trong thư mục `src/` được đối chiếu nghiêm ngặt 1-1 với Bản thiết kế kỹ thuật ([`thiet_ke_codebase_va_kien_truc_he_thong.md`](../thiet_ke_codebase_va_kien_truc_he_thong.md)):
 * **Docstring chuẩn mực**: Mỗi tệp đều bắt đầu bằng chú thích: *"Thực hiện Công đoạn X.X trong Tài liệu 1 và Module Y trong Tài liệu 2"*.
 * **An toàn kiểu dữ liệu (Strict Type Safety)**: Định kiểu tĩnh chuẩn Python 3.12, không sử dụng kiểu dữ liệu tự do `any`.
 * **Ràng buộc toán học**: Đảm bảo chuẩn hóa vector nhúng $\|\hat{z}(v)\|_2 = 1.0$, ma trận Cosine không âm $\operatorname{sim}(u, v) \ge 0$, và vector trọng số nhóm hiếm $w_v = 1/\sqrt{n_g} > 0$.
@@ -245,7 +270,7 @@ Người dùng có thể thực thi trực tiếp các lệnh sau qua terminal �
 
 1. **Kiểm tra Module Dữ liệu & Tiền xử lý (`src.data`)**:
    ```powershell
-   uv run python -c "from src.config.settings import load_config; from src.data.dataset_loader import DatasetLoader; cfg = load_config('configs/config_pilot_thyme.yaml'); bundle = DatasetLoader.load_and_preprocess_dataset(cfg); print(f'DATA OK: {bundle.num_cleaned}/{bundle.num_raw} chuỗi đạt chuẩn QC qua {bundle.num_subfamilies} phân họ.')"
+   uv run python -c "from src.config.settings import load_config; from src.data.dataset_loader import DatasetLoader; cfg = load_config('configs/config_exp1_baseline_calibration.yaml'); bundle = DatasetLoader.load_and_preprocess_dataset(cfg); print(f'DATA OK: {bundle.num_cleaned}/{bundle.num_raw} chuỗi đạt chuẩn QC qua {bundle.num_subfamilies} phân họ.')"
    ```
 
 2. **Kiểm tra Module Trọng số Nhóm hiếm (`src.weighting`)**:
@@ -260,7 +285,7 @@ Người dùng có thể thực thi trực tiếp các lệnh sau qua terminal �
 
 4. **Kiểm tra Toàn bộ Chương trình Chính**:
    ```powershell
-   uv run python experiments/run_pilot_thyme.py
+   uv run python experiments/exp1_baseline_calibration.py --config configs/config_exp1_baseline_calibration.yaml
    ```
 
 ---
@@ -268,10 +293,10 @@ Người dùng có thể thực thi trực tiếp các lệnh sau qua terminal �
 ## 7. NGUỒN SỰ THẬT DUY NHẤT (SINGLE SOURCE OF TRUTH)
 
 Dự án được định hướng và chuẩn hóa bởi 2 tài liệu trung tâm tại thư mục gốc:
-* [**`quy_trinh_thuc_hien_va_cac_cong_doan.md`**](file:///d:/programing/project/Topic%202/quy_trinh_thuc_hien_va_cac_cong_doan.md): Đặc tả 7 giai đoạn nghiên cứu khoa học thuần túy (mô hình toán học, động lực sinh học, luồng xử lý và tiêu chuẩn đánh giá).
-* [**`thiet_ke_codebase_va_kien_truc_he_thong.md`**](file:///d:/programing/project/Topic%202/thiet_ke_codebase_va_kien_truc_he_thong.md): Bản thiết kế kỹ thuật chi tiết của codebase (cấu trúc module, lớp, hàm, kiểu dữ liệu và ma trận truy vết 1-1).
-* [**`bao_cao_ket_qua_chi_tiet_topic2.md`**](file:///d:/programing/project/Topic%202/bao_cao_ket_qua_chi_tiet_topic2.md): Báo cáo đối đầu 1-1 chi tiết kèm số liệu cụ thể giữa RareProtSelect và Bài báo nền.
-* [**`project_overview.html`**](file:///d:/programing/project/Topic%202/project_overview/project_overview.html): Báo cáo trực quan sinh động dạng Dashboard HTML tương tác trên trình duyệt.
+* [**`quy_trinh_thuc_hien_va_cac_cong_doan.md`**](../quy_trinh_thuc_hien_va_cac_cong_doan.md): Đặc tả 7 giai đoạn nghiên cứu khoa học thuần túy (mô hình toán học, động lực sinh học, luồng xử lý và tiêu chuẩn đánh giá).
+* [**`thiet_ke_codebase_va_kien_truc_he_thong.md`**](../thiet_ke_codebase_va_kien_truc_he_thong.md): Bản thiết kế kỹ thuật chi tiết của codebase (cấu trúc module, lớp, hàm, kiểu dữ liệu và ma trận truy vết 1-1).
+* [**`bao_cao_ket_qua_chi_tiet_topic2.md`**](../bao_cao_ket_qua_chi_tiet_topic2.md): Báo cáo đối đầu 1-1 chi tiết kèm số liệu cụ thể giữa RareProtSelect và Bài báo nền.
+* [**`project_overview.html`**](../project_overview/project_overview.html): Báo cáo trực quan sinh động dạng Dashboard HTML tương tác trên trình duyệt.
 
 ---
 *RareProtSelect Team © 2026. Phát triển với Python 3.12, PyTorch CUDA 13.0 & NVIDIA RTX 5060.*

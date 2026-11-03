@@ -1,0 +1,46 @@
+# Cấu hình thực nghiệm Nhánh 4: Kiểm tra chéo 2x2 giữa Không gian Căn chỉnh Rời rạc (BLASTp) và Không gian Ngữ nghĩa Liên tục (ESM-2)
+# Thực hiện Công đoạn 4.1, 4.2, 4.3 trong Tài liệu 1 và Module 4.7 trong Tài liệu 2
+
+experiment_name: "exp4_cross_eval_a1a"
+dataset_name: "MEROPS_A1A_curated"
+fasta_path: "../baseline_repo/MEROPS_A1A.fasta"
+output_dir: "outputs"
+embeddings_cache_dir: "outputs/embeddings_cache"
+
+# Tiền xử lý & lọc QC theo Phương án 3B (khớp 100% Nhánh 2 và Nhánh 3)
+min_seq_len: 30
+max_seq_len: 2000
+max_ambiguous_ratio: 0.05
+rare_threshold: 5
+exclude_unknown_subfamilies: true
+
+# Cấu hình Live BLASTp đo lường độ nhạy nội phân họ thực tế (Mặt trận 1: 5 chỉ số Sensitivity BLAST %)
+blast_bin_path: "tools/blast/bin/blastp.exe"
+blast_live_coverage_evaluation:
+  evalue: 1.0e-7
+  max_target_seqs: 999999
+  num_threads: 24
+
+# Cấu hình không gian biểu diễn ESM-2 Partial Mean-Centered Cosine (Mặt trận 2: 4 chỉ số Coverage ESM %)
+esm_representation:
+  model_name: "facebook/esm2_t12_35M_UR50D"
+  normalization: "partial_mean_centered_cosine"
+  center_shift_beta: 0.70
+  batch_size: 16
+  device: "auto"
+
+# Tham số thuật toán đồng thuận cố định từ Nhánh 2 và Nhánh 3
+algorithm_name: "2x2 Cross-Space Within-Subfamily Evaluation (BLASTp-Selected vs. ESM2-Selected, 1,000-Shuffle Consensus)"
+prune_threshold: 0.90
+num_shuffles: 1000
+seed: 42
+budget_per_shuffle: 115
+
+# Hai không gian chọn đại diện đối chứng trực diện
+selection_spaces: ["BLASTp", "ESM-2"]
+
+# Dải 3 mốc tham số alpha cốt lõi
+alphas: [0.0, 0.5, 1.0]
+
+# Dải 20 mốc ngân sách chiến lược tiến tới tổng số 115 phân họ định danh
+budget_k_list: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 15, 20, 25, 30, 40, 50, 60, 75, 115]

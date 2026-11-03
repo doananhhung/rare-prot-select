@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -16,7 +15,7 @@ logger = logging.getLogger(__name__)
 class NumpyJSONEncoder(json.JSONEncoder):
     """JSON Encoder hỗ trợ chuyển đổi các kiểu dữ liệu Numpy và Pandas."""
 
-    def default(self, obj: Any) -> Any:
+    def default(self, obj: object) -> object:
         if isinstance(obj, (np.integer, np.int64, np.int32)):
             return int(obj)
         if isinstance(obj, (np.floating, np.float64, np.float32)):
@@ -40,7 +39,7 @@ class ResultExporter:
         return p
 
     @classmethod
-    def export_to_csv(cls, data: list[dict[str, Any]] | pd.DataFrame, output_path: str | Path) -> None:
+    def export_to_csv(cls, data: list[dict[str, object]] | pd.DataFrame, output_path: str | Path) -> None:
         """Xuất kết quả ra tệp CSV."""
         out_p = cls._ensure_dir(output_path)
         if isinstance(data, pd.DataFrame):
@@ -51,7 +50,7 @@ class ResultExporter:
         logger.info(f"Exported CSV table: {out_p}")
 
     @classmethod
-    def export_to_json(cls, data: dict[str, Any] | list[Any], output_path: str | Path, indent: int = 2) -> None:
+    def export_to_json(cls, data: dict[str, object] | list[object], output_path: str | Path, indent: int = 2) -> None:
         """Xuất kết quả ra tệp JSON."""
         out_p = cls._ensure_dir(output_path)
         with open(out_p, "w", encoding="utf-8") as f:
@@ -88,7 +87,7 @@ class ResultExporter:
     @classmethod
     def export_summary_table(
         cls,
-        results: list[dict[str, Any]],
+        results: list[dict[str, object]],
         output_base_path: str | Path,
         title: str = "Summary Table",
     ) -> None:
@@ -103,6 +102,20 @@ class ResultExporter:
         cls.export_to_csv(df, csv_path)
         cls.export_to_json(results, json_path)
         cls.export_to_markdown(df, md_path, title=title)
+
+    @classmethod
+    def export_dataframe(
+        cls,
+        df: pd.DataFrame,
+        csv_path: str | Path,
+        json_path: str | Path,
+        markdown_path: str | Path,
+        title: str = "Experimental Results",
+    ) -> None:
+        """Xuất đồng thời DataFrame ra cả 3 định dạng: CSV, JSON và Markdown."""
+        cls.export_to_csv(df, csv_path)
+        cls.export_to_json(df.to_dict(orient="records"), json_path)
+        cls.export_to_markdown(df, markdown_path, title=title)
 
 
 # Standalone function aliases matching Doc 2 specifications

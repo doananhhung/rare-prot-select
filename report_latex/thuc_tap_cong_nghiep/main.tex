@@ -1,0 +1,234 @@
+\documentclass[12pt,a4paper]{report}
+
+\usepackage[top=2.5cm, bottom=2.5cm, left=3.5cm, right=2.5cm]{geometry}
+\usepackage{setspace}
+\setstretch{1.3}
+\setlength{\parskip}{2.5pt}
+\setlength{\parindent}{1.0cm}
+\widowpenalty=10000
+\clubpenalty=10000
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\floatname{algorithm}{Thuật toán}
+\numberwithin{algorithm}{chapter}
+\renewcommand{\algorithmicrequire}{\textbf{Đầu vào:}}
+\renewcommand{\algorithmicensure}{\textbf{Đầu ra:}}
+
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\setmonofont{Consolas}[Scale=MatchLowercase]
+
+\usepackage{graphicx}
+\graphicspath{{../}}
+\usepackage{float}
+\usepackage{placeins}
+\usepackage{fancybox}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{titletoc}
+\usepackage{chngcntr}
+
+% Đánh số toàn cục liên tục cho Bảng và Hình theo chuẩn mẫu báo cáo thực tập
+\counterwithout{table}{chapter}
+\counterwithout{figure}{chapter}
+
+% Định nghĩa hệ số đếm: Chương dùng số La Mã, Mục và Tiểu mục dùng số Ả Rập
+\renewcommand{\thechapter}{\Roman{chapter}}
+\renewcommand{\thesection}{\arabic{chapter}.\arabic{section}}
+\renewcommand{\thesubsection}{\arabic{chapter}.\arabic{section}.\arabic{subsection}}
+
+% Cấu hình tiêu đề theo Chuẩn Báo cáo Thực tập Công nghiệp (Báo-cáo-thực-tập-CN.pdf)
+\titleformat{\chapter}[block]
+    {\normalfont\large\bfseries\centering}
+    {CHƯƠNG \thechapter:\quad}
+    {0pt}
+    {}
+\titleformat{name=\chapter,numberless}[hang]
+    {\normalfont\large\bfseries\centering}
+    {}
+    {0pt}
+    {}
+\titlespacing*{\chapter}
+    {0pt}
+    {-20pt}
+    {15pt}
+
+\titleformat{\section}[hang]
+    {\normalfont\large\bfseries}
+    {\thesection.\quad}
+    {0pt}
+    {}
+\titlespacing*{\section}
+    {0pt}
+    {12pt}
+    {6pt}
+
+\titleformat{\subsection}[hang]
+    {\normalfont\normalsize\bfseries\itshape}
+    {\thesubsection.\quad}
+    {0pt}
+    {}
+\titlespacing*{\subsection}
+    {0pt}
+    {10pt}
+    {4pt}
+
+% Cấu hình hiển thị Mục lục (TOC) theo chuẩn mẫu trường: CHƯƠNG I: <TÊN CHƯƠNG>
+\titlecontents{chapter}[0pt]
+    {\vspace{3pt}\bfseries}
+    {CHƯƠNG \thecontentslabel:\quad}
+    {}
+    {\quad\titlerule*[0.75pc]{.}\contentspage}
+
+\titlecontents{section}[2.2em]
+    {\normalfont}
+    {\thecontentslabel.\quad}
+    {}
+    {\quad\titlerule*[0.75pc]{.}\contentspage}
+
+\titlecontents{subsection}[4.5em]
+    {\normalfont\itshape}
+    {\thecontentslabel.\quad}
+    {}
+    {\quad\titlerule*[0.75pc]{.}\contentspage}
+
+% Cấu hình hiển thị Danh mục Bảng biểu & Hình ảnh với tiền tố Bảng X: và Hình X:
+\titlecontents{table}[0pt]
+    {\normalfont}
+    {Bảng \thecontentslabel:\quad}
+    {}
+    {\quad\titlerule*[0.75pc]{.}\contentspage}
+
+\titlecontents{figure}[0pt]
+    {\normalfont}
+    {Hình \thecontentslabel:\quad}
+    {}
+    {\quad\titlerule*[0.75pc]{.}\contentspage}
+
+\usepackage{tikz}
+\usetikzlibrary{
+    arrows.meta,
+    backgrounds,
+    calc,
+    fit,
+    positioning,
+    shapes.geometric,
+    shapes.multipart
+}
+
+\renewcommand{\contentsname}{MỤC LỤC}
+\renewcommand{\listfigurename}{DANH MỤC HÌNH ẢNH}
+\renewcommand{\listtablename}{DANH MỤC BẢNG BIỂU}
+\renewcommand{\chaptername}{Chương}
+\renewcommand{\figurename}{Hình}
+\renewcommand{\tablename}{Bảng}
+\renewcommand{\bibname}{TÀI LIỆU THAM KHẢO}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=black,
+    citecolor=black
+}
+\urlstyle{same}
+
+\setlist[itemize]{label={-}, leftmargin=1.0cm, itemsep=2pt, topsep=2pt, parsep=0pt}
+\setlist[enumerate]{leftmargin=1.0cm, itemsep=2pt, topsep=2pt, parsep=0pt}
+\renewcommand{\arraystretch}{1.25}
+\setlength{\tabcolsep}{3pt}
+\newcolumntype{L}[1]{>{\raggedright\hspace{0pt}\arraybackslash}p{#1}}
+\newcolumntype{Y}{>{\raggedright\hspace{0pt}\arraybackslash}X}
+\newcommand{\code}[1]{{\ttfamily\urlstyle{same}\nolinkurl{#1}}}
+
+% Quy chuẩn mẫu trường: TUYỆT ĐỐI KHÔNG DÙNG RUNNING HEADER VÀ ĐƯỜNG KẺ Ở ĐỈNH TRANG
+\pagestyle{plain}
+\fancypagestyle{plain}{
+    \fancyhf{}
+    \fancyfoot[C]{\thepage}
+    \renewcommand{\headrulewidth}{0pt}
+}
+
+\setlength{\headheight}{16.5pt}
+\emergencystretch=3em
+\hyphenation{RareProtSelect Subfamily Subfamilies Peptidase Peptidases Facility Location BLASTp}
+\renewcommand{\topfraction}{0.90}
+\renewcommand{\bottomfraction}{0.80}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.85}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+
+\begin{document}
+
+% 1. Trang bìa: không số trang, không running header
+\pagenumbering{gobble}
+\thispagestyle{empty}
+\input{contents/frontmatter/cover}
+\clearpage
+
+% 2. Phiếu nhận xét chuẩn mẫu Báo-cáo-thực-tập-CN.pdf: 1 trang duy nhất, không số trang
+\thispagestyle{empty}
+\input{contents/frontmatter/review_form}
+\clearpage
+
+% 3. Lời cảm ơn: không số trang
+\thispagestyle{empty}
+\input{contents/frontmatter/acknowledgement}
+\clearpage
+
+% 4. Mục lục: không số trang, vừa vặn trên 1 trang duy nhất
+\thispagestyle{empty}
+\begingroup
+\setstretch{0.90}
+\setlength{\parskip}{0pt}
+\addtocontents{toc}{\protect\thispagestyle{empty}}
+\addtocontents{toc}{\protect\enlargethispage{2.5\baselineskip}}
+\tableofcontents
+\endgroup
+\clearpage
+
+% 5. Danh mục bảng biểu & Danh mục hình ảnh: gộp trên cùng 1 trang duy nhất, không số trang
+\thispagestyle{empty}
+\begingroup
+\setstretch{1.0}
+\setlength{\parskip}{0pt}
+{\centering\Large\bfseries DANH MỤC BẢNG BIỂU\par\vspace{0.4cm}}
+\makeatletter
+\let\orig@addvspace\addvspace
+\renewcommand*{\addvspace}[1]{}
+\@starttoc{lot}
+\vspace{1.2cm}
+{\centering\Large\bfseries DANH MỤC HÌNH ẢNH\par\vspace{0.4cm}}
+\@starttoc{lof}
+\let\addvspace\orig@addvspace
+\makeatother
+\endgroup
+\clearpage
+
+% 6. Thân bài 5 chương chuẩn Báo cáo Thực tập Công nghiệp: Đánh số trang Ả Rập từ 1
+\pagenumbering{arabic}
+\setcounter{page}{1}
+\pagestyle{plain}
+
+\input{contents/chapters/01_gioi_thieu_orlab}
+\input{contents/chapters/02_muc_tieu_ke_hoach_lich_trinh}
+\input{contents/chapters/03_tinh_hinh_thuc_tap_du_an}
+\input{contents/chapters/04_tu_danh_gia}
+\input{contents/chapters/05_ket_luan_kien_nghi}
+
+% 7. Tài liệu tham khảo
+\input{contents/references}
+
+\end{document}

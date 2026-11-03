@@ -1,0 +1,101 @@
+[
+  {
+    "budget_k": 1,
+    "num_selected": 1,
+    "overall_sensitivity_blast_pct": 82.36,
+    "retrieved_hits_count": 10959,
+    "total_cleaned_sequences": 13307,
+    "published_fig8_sensitivity_pct": 80.5,
+    "deviation_pct": 1.86
+  },
+  {
+    "budget_k": 2,
+    "num_selected": 2,
+    "overall_sensitivity_blast_pct": 83.55,
+    "retrieved_hits_count": 11118,
+    "total_cleaned_sequences": 13307,
+    "published_fig8_sensitivity_pct": 83.5,
+    "deviation_pct": 0.05
+  },
+  {
+    "budget_k": 3,
+    "num_selected": 3,
+    "overall_sensitivity_blast_pct": 85.85,
+    "retrieved_hits_count": 11424,
+    "total_cleaned_sequences": 13307,
+    "published_fig8_sensitivity_pct": 85.7,
+    "deviation_pct": 0.15
+  },
+  {
+    "budget_k": 4,
+    "num_selected": 4,
+    "overall_sensitivity_blast_pct": 86.88,
+    "retrieved_hits_count": 11561,
+    "total_cleaned_sequences": 13307,
+    "published_fig8_sensitivity_pct": 86.7,
+    "deviation_pct": 0.18
+  },
+  {
+    "budget_k": 5,
+    "num_selected": 5,
+    "overall_sensitivity_blast_pct": 88.1,
+    "retrieved_hits_count": 11723,
+    "total_cleaned_sequences": 13307,
+    "published_fig8_sensitivity_pct": 88.0,
+    "deviation_pct": 0.1
+  },
+  {
+    "budget_k": 6,
+    "num_selected": 6,
+    "overall_sensitivity_blast_pct": 88.17,
+    "retrieved_hits_count": 11733,
+    "total_cleaned_sequences": 13307,
+    "published_fig8_sensitivity_pct": 88.1,
+    "deviation_pct": 0.07
+  },
+  {
+    "budget_k": 7,
+    "num_selected": 7,
+    "overall_sensitivity_blast_pct": 88.77,
+    "retrieved_hits_count": 11813,
+    "total_cleaned_sequences": 13307,
+    "published_fig8_sensitivity_pct": 88.4,
+    "deviation_pct": 0.37
+  },
+  {
+    "budget_k": 8,
+    "num_selected": 8,
+    "overall_sensitivity_blast_pct": 90.51,
+    "retrieved_hits_count": 12044,
+    "total_cleaned_sequences": 13307,
+    "published_fig8_sensitivity_pct": 89.0,
+    "deviation_pct": 1.51
+  },
+  {
+    "budget_k": 9,
+    "num_selected": 9,
+    "overall_sensitivity_blast_pct": 90.66,
+    "retrieved_hits_count": 12064,
+    "total_cleaned_sequences": 13307,
+    "published_fig8_sensitivity_pct": 90.7,
+    "deviation_pct": -0.04
+  },
+  {
+    "budget_k": 10,
+    "num_selected": 10,
+    "overall_sensitivity_blast_pct": 91.43,
+    "retrieved_hits_count": 12167,
+    "total_cleaned_sequences": 13307,
+    "published_fig8_sensitivity_pct": 90.8,
+    "deviation_pct": 0.63
+  },
+  {
+    "budget_k": 11,
+    "num_selected": 11,
+    "overall_sensitivity_blast_pct": 91.59,
+    "retrieved_hits_count": 12188,
+    "total_cleaned_sequences": 13307,
+    "published_fig8_sensitivity_pct": 90.9,
+    "deviation_pct": 0.69
+  }
+]

@@ -11,31 +11,88 @@ dist/
 build/
 
 # ==============================================================================
-# 2. PYTHON BYTECODE & CACHE
+# 2. PYTHON BYTECODE & TOOL CACHES
 # ==============================================================================
 __pycache__/
 */__pycache__/
-*.py[cod]
+**/*.py[cod]
 *$py.class
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
+.interface_cache.json
+**/.interface_cache.json
 
 # ==============================================================================
-# 3. HEAVY ARTIFACTS & EXPERIMENT CACHE (>100MB RISKS)
+# 3. HEAVY ARTIFACTS & EXPERIMENT CACHES (>100MB GITHUB LIMIT SAFETY)
 # ==============================================================================
-# Embeddings & Similarity matrices (reproducible from source code)
-RareProtSelect/outputs/embeddings_cache/*.npy
-RareProtSelect/outputs/similarity_cache/*
+# Large similarity matrices, embeddings & raw alignments (reproducible via pipeline)
+RareProtSelect/outputs/similarity_cache/
+RareProtSelect/outputs/embeddings_cache/
 *.npy
 *.npz
 *.pt
 *.pth
 *.bin
 *.h5
+*.tsv
+*.raw.txt
+
+# Local external binaries & large archives
+RareProtSelect/tools/
+tools/
+*.tar.gz
+*.tar
+*.zip
+*.7z
 
 # ==============================================================================
-# 4. AGENTS & IDE LOGS
+# 4. LATEX AUXILIARY & BUILD ARTIFACTS
+# ==============================================================================
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.synctex(busy)
+*.xdv
+*.bbl
+*.blg
+*.nav
+*.snm
+*.vrb
+*.run.xml
+*-blx.bib
+texput.log
+texput.aux
+
+# ==============================================================================
+# 5. TEMPORARY VISUAL INSPECTION, AUDIT SCREENSHOTS & DEBRIS
+# ==============================================================================
+# Temporary agent review renders (real publication figures in Images/figures/ & orlab/ are tracked)
+**/rendered_pages/
+**/preview_*.png
+**/visual_check_*.png
+**/audit_*.png
+**/updated_page_*.png
+**/final_page_*.png
+**/final_audit_*.png
+**/page_*.png
+**/qa_page*.png
+**/redloop_page*.png
+report_latex/qa/runs/
+**/test_vis/
+temp_*/
+RareProtSelect/temp_*/
+**/archive/
+sample.pdf
+
+# ==============================================================================
+# 6. AGENTS & IDE CONFIGURATIONS
 # ==============================================================================
 .agents/
 .gemini/
@@ -44,7 +101,7 @@ RareProtSelect/outputs/similarity_cache/*
 !.vscode/settings.json
 
 # ==============================================================================
-# 5. OPERATING SYSTEM ARTIFACTS
+# 7. OPERATING SYSTEM ARTIFACTS
 # ==============================================================================
 Thumbs.db
 Thumbs.db:encryptable

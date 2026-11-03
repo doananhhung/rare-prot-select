@@ -1,0 +1,54 @@
+\chapter{TỰ ĐÁNH GIÁ}
+\label{chap:tu_danh_gia}
+
+Sau 3 tuần thực tập (từ ngày 26/10/2026 đến ngày 15/11/2026) và trực tiếp tham gia nghiên cứu đề tài tại phòng thí nghiệm ORLab, tôi tự đánh giá các kết quả đạt được, năng lực cá nhân cũng như những trải nghiệm học thuật trong môi trường nghiên cứu chuyên sâu.
+
+\section{So với mục tiêu ban đầu}
+\label{sec:danh_gia_muc_tieu}
+
+Đối chiếu với các mục tiêu cá nhân và nhiệm vụ nghiên cứu khoa học đã đề ra trong chương~\ref{chap:ke_hoach_lich_trinh}, tôi đã hoàn thành đầy đủ các cam kết học thuật:
+
+\begin{itemize}
+    \item \textbf{Về mặt khoa học và mô hình hóa}: Đã hoàn thiện mô hình toán học RareProtSelect, chứng minh chặt chẽ tính đơn điệu không giảm và submodular của hàm mục tiêu Facility Location có trọng số phạt quy mô nhóm, bảo đảm tỷ lệ xấp xỉ $(1 - 1/e)$ theo định lý Nemhauser.
+    \item \textbf{Về mặt kỹ thuật và giải thuật}: Đã cài đặt thành công thuật toán tham lam cắt tỉa Pruned Greedy 90\% tăng tốc trên GPU PyTorch CUDA và cơ chế tổng hợp thứ hạng toàn cục qua $1.000$ lần xáo trộn ngẫu nhiên. Đồng thời, giải quyết thành công hiện tượng co cụm vector Anisotropy của mô hình ngôn ngữ protein ESM-2 bằng kỹ thuật dịch tâm Mean-Centering.
+    \item \textbf{Về mặt thực nghiệm và sản phẩm bàn giao}: Đã chạy thực tế $100\%$ cả 6 kịch bản thử nghiệm đối chuẩn trên tập $4.120$ chuỗi MEROPS A1A, lưu trữ dữ liệu định lượng nguyên văn vào các tệp CSV và đồ thị đạt chuẩn xuất bản học thuật.
+\end{itemize}
+
+\section{Tự đánh giá hiệu suất trong quá trình thực tập}
+\label{sec:danh_gia_hieu_suat}
+
+Tôi luôn duy trì tinh thần làm việc chủ động, nghiêm túc tuân thủ lịch trình và các quy chuẩn kỹ thuật tại ORLab:
+\begin{itemize}
+    \item \textbf{Tính kỷ luật và đúng hạn}: Toàn bộ các mốc công việc từ khảo sát lý thuyết, thiết kế pipeline đến đo đạc thực nghiệm đều được hoàn thành đúng hoặc sớm hơn thời hạn trong kế hoạch tuần.
+    \item \textbf{Khả năng giải quyết nút thắt kỹ thuật}: Trong quá trình tính toán ma trận tương đồng trên dữ liệu lớn, khi gặp thách thức về chi phí thời gian và sự phụ thuộc vào thứ tự duyệt mảng khi các ứng viên có cùng độ tăng cận biên, tôi đã chủ động đề xuất giải pháp vector hóa giải thuật Pruned Greedy 90\% trên GPU PyTorch CUDA kết hợp cơ chế tổng hợp thứ hạng toàn cục qua $1.000$ vòng xáo trộn hoán vị ngẫu nhiên để bảo đảm hiệu năng tính toán và độ ổn định của mã nguồn.
+    \item \textbf{Ý thức liêm chính khoa học}: Tuân thủ nghiêm ngặt nguyên tắc đối soát dữ liệu nguyên văn $100\%$, tuyệt đối không suy diễn hay đưa ra các số liệu giả định trong báo cáo kỹ thuật.
+\end{itemize}
+
+\section{Tự đánh giá kỹ năng cá nhân}
+\label{sec:danh_gia_ky_nang}
+
+Kỳ thực tập tại ORLab đã mang lại sự trưởng thành vượt bậc cho tôi trên cả phương diện kỹ thuật chuyên môn lẫn phương pháp luận nghiên cứu:
+
+\subsection{Kỹ năng kỹ thuật và lập trình}
+\begin{itemize}
+    \item Thành thạo việc xây dựng kiến trúc codebase nghiên cứu hoàn chỉnh bằng Python 3.12 và trình quản lý môi trường hiện đại uv.
+    \item Nâng cao năng lực tính toán khoa học với PyTorch tăng tốc trên GPU NVIDIA CUDA 13.0, tối ưu hóa các phép toán đại số tuyến tính trên ma trận lớn.
+    \item Làm chủ các công cụ tin sinh học phân tử như Biopython, BLASTp cục bộ và mô hình ngôn ngữ protein ESM-2 của Meta AI.
+\end{itemize}
+
+\subsection{Kỹ năng mềm và phương pháp luận nghiên cứu}
+\begin{itemize}
+    \item Rèn luyện tư duy tiếp cận bài toán theo nguyên tắc cô lập biến số và phương pháp luận so sánh đối chứng khoa học khách quan.
+    \item Kỹ năng đọc hiểu, tổng hợp và phản biện các bài báo khoa học quốc tế uy tín trong các lĩnh vực tối ưu hóa tổ hợp và tin sinh học.
+    \item Năng lực soạn thảo văn bản học thuật chuyên nghiệp bằng LaTeX với hệ thống ký hiệu toán học giải tích chặt chẽ, quản lý tài liệu tham khảo và bảng biểu chuẩn mực.
+\end{itemize}
+
+\section{Đánh giá về chương trình thực tập}
+\label{sec:danh_gia_moi_truong_orlab}
+
+Tôi đánh giá rất cao môi trường học thuật và nghiên cứu tại phòng thí nghiệm ORLab:
+\begin{itemize}
+    \item \textbf{Sự định hướng chuyên sâu và tâm huyết}: TS. Trần Đình Tân luôn theo sát tiến độ nghiên cứu, đặt ra những câu hỏi phản biện sâu sắc giúp tôi nhìn nhận rõ bản chất toán học và cơ chế vận hành của mô hình.
+    \item \textbf{Môi trường cởi mở và khuyến khích sáng tạo}: Lab tạo mọi điều kiện thuận lợi về tài nguyên tính toán, tài liệu học thuật và không gian trao đổi để tôi tự do thử nghiệm các ý tưởng giải thuật mới.
+    \item \textbf{Tính thực tế và kết nối liên ngành}: Đề tài thực tập không chỉ dừng lại ở lý thuyết thuần túy mà gắn liền trực tiếp với bài toán lớn trong sinh học phân tử, mở ra triển vọng phát triển thành các công bố khoa học quốc tế có giá trị thực tiễn.
+\end{itemize}

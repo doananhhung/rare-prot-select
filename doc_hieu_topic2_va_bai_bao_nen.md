@@ -27,13 +27,13 @@
 
 | Thành phần | Bài báo nền (Nguyen et al., *Scientific Reports* 2025) | Đề tài 2 (RareProtSelect - Hướng phát triển) |
 | :--- | :--- | :--- |
-| **Không gian biểu diễn** | Chuỗi ký tự thô ([**FASTA**](./giai_thich_khai_niem.md#fasta)) | Vector nhúng ngữ nghĩa $z(v) \in \mathbb{R}^d$ sinh bởi [**ESM-2 PLM**](./giai_thich_khai_niem.md#esm2-plm) |
-| **Hàm tương đồng $\operatorname{sim}(u, v)$** | Tỷ lệ amino acid khớp nhau qua BLAST (% Identity) | Cosine similarity: $\max\{0, \cos(z(u), z(v))\}$ |
-| **Cơ chế trọng số** | **Unweighted**: Mọi chuỗi có trọng số bằng nhau ($w = 1/\|V\|$) | **Rare-Aware**: Ưu tiên nhóm hiếm $w_v = \frac{1}{\sqrt{n_{g(v)}}}$ |
-| **Hàm mục tiêu $F(S)$** | [**Facility Location**](./giai_thich_khai_niem.md#facility-location-unweighted): $F(S) = \frac{1}{\|V\|} \sum_{v \in V} \max_{s \in S} \phi(v, s)$ | [**Weighted Facility Location**](./giai_thich_khai_niem.md#weighted-facility-location): $F(S) = \sum_{v \in V} w_v \max_{s \in S} \operatorname{sim}_{PLM}(v, s)$ |
-| **Xử lý mất cân bằng** | Không xử lý; nhóm lớn áp đảo hoàn toàn nhóm nhỏ | Trọng số $w_v$ tăng lực kéo toán học cho nhóm hiếm |
-| **Thuật toán tối ưu** | [**Greedy**](./giai_thich_khai_niem.md#standard-greedy) / [**Bidirectional Greedy**](./giai_thich_khai_niem.md#bidirectional-greedy) (Bảo đảm $\ge 1 - 1/e$) | [**Lazy Greedy WFL**](./giai_thich_khai_niem.md#lazy-greedy) (Nghiệm giống 100% Greedy chuẩn, tăng tốc qua Max-Heap) |
-| **Nhiệm vụ kiểm chứng** | Đánh giá nội tại: Tái tạo cơ sở dữ liệu qua BLAST query | 1. **Bóc tách (Ablation)**: Chứng minh Hàm mục tiêu mới và Độ đo ESM-2 vượt trội hơn cũ trên cùng thuật toán Greedy.<br>2. **Đánh giá hạ nguồn**: **Annotation Transfer** (Macro-F1 cho nhóm hiếm). |
+| **Không gian biểu diễn** | Chuỗi ký tự thô ([**FASTA**](./giai_thich_khai_niem.md#fasta)) | Đối chứng hai không gian: Căn chỉnh cục bộ **BLASTp** vs. Vector nhúng ngữ nghĩa $z(v) \in \mathbb{R}^d$ sinh bởi [**ESM-2 PLM**](./giai_thich_khai_niem.md#esm2-plm) |
+| **Hàm tương đồng $\operatorname{sim}(u, v)$** | Tỷ lệ amino acid khớp nhau qua BLAST (% Identity) | BLASTp Identity ($\mathbf{S}_{\text{BLAST}}$) vs. Cosine similarity dịch tâm: $\max\{0, \cos(z'(u), z'(v))\}$ ($\mathbf{S}_{\text{ESM}}$) |
+| **Cơ chế trọng số** | **Unweighted**: Mọi chuỗi có trọng số bằng nhau ($w_v = 1.0$, ứng với $\alpha = 0.0$) | **Rare-Aware**: Họ trọng số tần suất nghịch đảo $w_v^{(\alpha)} = (n_{g(v)})^{-\alpha}$ với $\alpha \in \{0.0, 0.5, 1.0\}$ (trọng tâm cân bằng Pareto $\alpha = 0.5 \implies w_v = \frac{1}{\sqrt{n_{g(v)}}}$) |
+| **Hàm mục tiêu $F(S)$** | [**Facility Location**](./giai_thich_khai_niem.md#facility-location-unweighted): $F(S) = \sum_{v \in V} \max_{s \in S} \phi(v, s)$ | [**Weighted Facility Location**](./giai_thich_khai_niem.md#weighted-facility-location): $F_\alpha(S) = \sum_{v \in V} w_v^{(\alpha)} \max_{s \in S} \operatorname{sim}(v, s)$ |
+| **Xử lý mất cân bằng** | Không xử lý; nhóm lớn áp đảo hoàn toàn nhóm nhỏ | Trọng số $w_v^{(\alpha)}$ nén quyền lực nhóm lớn, tăng lực kéo toán học cho nhóm hiếm |
+| **Thuật toán tối ưu** | [**Pruned Greedy 90% (1,000-Shuffle Consensus)**](./giai_thich_khai_niem.md#standard-greedy) / [**Bidirectional Greedy**](./giai_thich_khai_niem.md#bidirectional-greedy) | Giữ nguyên bộ giải chuẩn của bài báo nền để cô lập biến số (*Ceteris Paribus*) / Mở rộng [**Lazy Greedy WFL**](./giai_thich_khai_niem.md#lazy-greedy) |
+| **Nhiệm vụ kiểm chứng** | Đánh giá gộp toàn cục: Tái tạo cơ sở dữ liệu qua duy nhất chỉ số `Overall Sensitivity BLAST (%)` | Chuỗi 5 nhánh thực nghiệm tuần tự trả lời **5 Câu hỏi Nghiên cứu (`RQ1` $\to$ `RQ5`)**:<br>1. **Đánh giá thu hồi nội phân họ (`Within-Subfamily Representative Query`: $S_k \cap V_g \to V_g$)**.<br>2. **Kiểm tra chéo hai chiều ($2 \times 2$ Cross-Space Evaluation)** giữa `BLASTp` và `ESM-2`.<br>3. **Phân tích trực tiếp tỷ lệ đại diện phân họ & độ dư thừa ngân sách trong $S_k$**. |
 
 ### Chi tiết các điểm đột phá của Đề tài 2:
 
@@ -51,6 +51,10 @@
 Bài báo nền đã thực nghiệm thuật toán [**Greedy**](./giai_thich_khai_niem.md#standard-greedy) trên 27 họ Thioesterase (TE - ThYme DB, 737 chuỗi), họ Carboxylesterase (CE - ESTHER DB, 12,277 chuỗi) và họ Peptidase A1 (A1A - MEROPS DB, 13,847 chuỗi), so sánh với [**Bidirectional Greedy**](./giai_thich_khai_niem.md#bidirectional-greedy), **CD-HIT**, **MMseqs2**, và chuẩn chuyên gia (**Ad hoc + Manual curation**):
 
 ### 3.1. Ý nghĩa các chỉ số và khía cạnh đánh giá (Evaluation Metrics kèm Ví Dụ & Tính Toán Chi Tiết)
+
+> 📖 **CẨM NANG TOÀN DIỆN VỀ CÁC CHỈ SỐ ĐÁNH GIÁ (EVALUATION METRICS COMPENDIUM)**:
+> Toàn bộ công thức toán học KaTeX, ý nghĩa sinh học, ví dụ tính toán số thực tế từng bước trên 3 bộ dữ liệu (TE, CE, A1A), phân tích bản chất và ma trận đối đầu 1-1 đã được tách và tổng hợp đầy đủ trong tài liệu chuyên đề độc lập:
+> 👉 [**`tong_hop_cac_chi_so_danh_gia.md` (Tổng Hợp Toàn Diện Các Chỉ Số Đánh Giá)**](./tong_hop_cac_chi_so_danh_gia.md).
 
 Bài báo nền thiết kế khung đánh giá gồm 5 khía cạnh/chỉ số thực nghiệm cụ thể:
 
@@ -116,15 +120,15 @@ Bài báo nền thiết kế khung đánh giá gồm 5 khía cạnh/chỉ số t
 ---
 
 #### 5. Độ bao phủ theo ngân sách trên Siêu họ lớn (Coverage vs. Budget $k$) *(Hình 8 trong bài báo)*
-* **Ý nghĩa sinh học**: Đánh giá **Hiệu quả biên theo từng đồng ngân sách $k$** — biểu diễn đường cong tích lũy độ bao phủ khi ta tăng dần số lượng chuỗi đại diện $k$ từ $1, 2, 5, 10, \dots, 600$.
+* **Ý nghĩa sinh học**: Đánh giá **Hiệu quả biên theo từng đồng ngân sách $k$** — biểu diễn đường cong tích lũy độ bao phủ khi ta tăng dần số lượng chuỗi đại diện $k$ từ $1, 2, \dots, 11$.
 
 * **Ví dụ thực tế & Tính toán trên Siêu họ Peptidase A1 (A1A - 13,847 chuỗi)**:
   * Khi thay đổi ngân sách $k$, độ bao phủ của Greedy tăng trưởng vượt bậc theo quy luật lợi ích biên giảm dần (*Diminishing Returns*):
-    * Tại $k = 1$: Độ bao phủ đạt **$42\%$** (chỉ 1 chuỗi đã đại diện được gần nửa siêu họ).
-    * Tại $k = 10$: Độ bao phủ tăng vọt lên **$> 90\%$** ($12,460 / 13,847$ chuỗi được bao phủ).
-    * Tại $k = 100$: Độ bao phủ đạt **$97.5\%$**.
-    * Tại $k = 600$: Độ bao phủ chạm mốc tuyệt đối **$100\%$**.
-  * **Kết luận**: Người dùng có thể linh hoạt chọn $k=10$ nếu muốn tiết kiệm tài nguyên tối đa (giữ được 90% thông tin), hoặc chọn $k=600$ nếu muốn trọn vẹn 100%, thay vì bị động nhận về $8,774$ chuỗi cứng nhắc như CD-HIT.
+    * Đồ thị Hình 8 Panel A (trang 12) khảo sát thực tế trên đúng 11 mốc ngân sách ($k = 1, 2, \dots, 11$). Đo tọa độ tâm điểm trực tiếp trên đồ thị Hình 8A (tỉ lệ trục tung $31.10\text{ px} = 1.0\%$, làm tròn 1 chữ số thập phân, lưu tại [`RareProtSelect/outputs/tables/nguyen2025_fig8a_benchmark.csv`](./RareProtSelect/outputs/tables/nguyen2025_fig8a_benchmark.csv)) cho thấy:
+      - Tại $k = 1, 2, 3, 4$: Pruned Greedy 90% (1,000-Shuffle) đạt lần lượt **$\sim 80.5\%$**, **$\sim 83.5\%$**, **$\sim 85.7\%$**, **$\sim 86.7\%$** (trong khi Bidirectional Greedy xuất phát tại $k=1$ từ **$\sim 71.0\%$**).
+      - Tại $k = 5, 6, 7, 8$: Độ bao phủ đạt lần lượt **$\sim 88.0\%$**, **$\sim 88.1\%$**, **$\sim 88.4\%$**, **$\sim 89.0\%$**.
+      - Tại $k = 9, 10, 11$: Độ bao phủ vượt ngưỡng $90\%$ ngay từ $k = 9$ (**$\sim 90.7\%$**, khớp với khẳng định *"achieve over 90% coverage with less than 10 representative sequences"* tại trang 11), tiếp tục đạt **$\sim 90.8\%$** tại $k = 10$ và **$\sim 90.9\%$** tại $k = 11$.
+  * **Kết luận**: Người dùng có thể linh hoạt chọn $k=10$ hoặc $k=11$ nếu muốn tiết kiệm tài nguyên tối đa (giữ được $>90\%$ thông tin), thay vì bị động nhận về $8,774$ chuỗi cứng nhắc như CD-HIT.
 
 ---
 
@@ -132,8 +136,8 @@ Bài báo nền thiết kế khung đánh giá gồm 5 khía cạnh/chỉ số t
 
 | Phương pháp | Kích thước tập TE (Giảm dư thừa) | Sensitivity (Độ nhạy TE) | Specificity (Độ đặc hiệu) | % Identity với Chuẩn chuyên gia | Hiệu năng trên Siêu họ lớn (CE & A1A) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Greedy (Paper nền)** | **Rất nhỏ (Tối ưu nhất)** | **100% (Đạt 80% chỉ với $k=2$)** | **~ 1.0 (Sai số bắt nhầm ~0.02%)** | **Cao nhất (>80% ở đa số họ)** | **Chỉ cần $<10$ chuỗi đạt 100% CE; ~600 chuỗi đạt 100% A1A** |
-| **Bidirectional Greedy** | Trung bình – Lớn | 100% (Chậm hơn, cần $k=4$) | ~ 1.0 | Khá | Đạt 100% nhưng kích thước tập lớn hơn Greedy |
+| **Greedy (Paper nền)** | **Rất nhỏ (Tối ưu nhất)** | **100% (Đạt 80% chỉ với $k=2$)** | **~ 1.0 (Sai số bắt nhầm ~0.02%)** | **Cao nhất (>80% ở đa số họ)** | **Chỉ cần $<10$ chuỗi đạt 100% CE; 11 chuỗi đạt >90% A1A** |
+| **Bidirectional Greedy** | Trung bình – Lớn | 100% (Chậm hơn, cần $k=4$) | ~ 1.0 | Khá | Đạt độ phủ cao nhưng kích thước tập lớn hơn Greedy |
 | **CD-HIT** | Rất lớn (Dư thừa ở 19 họ) | Biến động theo ngưỡng | Phụ thuộc ngưỡng | Biến động mạnh (<50% ở nhiều họ) | 10,564 chuỗi (CE) và 8,774 chuỗi (A1A) (Dư thừa nghiêm trọng) |
 | **MMseqs2** | Lớn (Dư thừa ở đa số họ) | Biến động theo ngưỡng | Phụ thuộc ngưỡng | Biến động mạnh | 2,323 chuỗi (CE) và 1,701 chuỗi (A1A) (Dư thừa lớn) |
 | **Ad hoc (Chuyên gia ThYme)** | Chuẩn tham chiếu (Gold Standard) | 100% | 1.0 | 100% (Chính là tập chuẩn) | Không khả thi (quá tốn nhân lực để làm thủ công) |
@@ -150,89 +154,108 @@ Bài báo nền thiết kế khung đánh giá gồm 5 khía cạnh/chỉ số t
    * Greedy đạt Specificity xấp xỉ 1.0 trên tất cả các họ. Tỷ lệ nhận diện nhầm chuỗi thuộc họ khác (*False Positive*) tối đa chỉ khoảng **0.02%**.
 4. **Hiệu quả vượt bậc trên các siêu họ protein (CE và A1A)**:
    * **Họ CE (12,277 chuỗi)**: Greedy đạt **100% coverage với chỉ dưới 10 chuỗi**. Trong khi đó, CD-HIT sinh ra **10,564 chuỗi**, MMseqs2 sinh ra **2,323 chuỗi**.
-   * **Họ A1A (13,847 chuỗi)**: Greedy đạt **> 90% coverage với dưới 10 chuỗi** và đạt 100% với khoảng 600 chuỗi. Ngược lại, CD-HIT sinh ra **8,774 chuỗi** và MMseqs2 sinh ra **1,701 chuỗi**.
+   * **Họ A1A (13,847 chuỗi)**: Greedy đạt **> 90% coverage với 10-11 chuỗi**. Ngược lại, CD-HIT sinh ra **8,774 chuỗi** và MMseqs2 sinh ra **1,701 chuỗi**.
 
 ---
 
-## 4. CÁC HẠNG MỤC ĐÁNH GIÁ: PHƯƠNG PHÁP MỚI vs. BÀI BÁO NỀN (VÀ CÁC THỰC NGHIỆM BẮT BUỘC)
+## 4. HỆ THỐNG 5 CÂU HỎI NGHIÊN CỨU (RQ1 $\to$ RQ5) & KHUNG CHỈ SỐ ĐÁNH GIÁ ĐỐI ĐẦU
 
-Để chứng minh tính đóng góp khoa học và bảo đảm bài báo đạt độ chặt chẽ tuyệt đối, khung đánh giá thực nghiệm được chia thành 3 phần rõ rệt:
+> 💡 **TRA CỨU TOÀN BỘ CÔNG THỨC & VÍ DỤ TÍNH TOÁN**:
+> Bảng tổng hợp công thức, phân loại 3 nhóm thước đo và số liệu đối đầu thực nghiệm 1-1 chi tiết được trình bày tập trung tại [**`tong_hop_cac_chi_so_danh_gia.md`**](./tong_hop_cac_chi_so_danh_gia.md), và kết quả trả lời chi tiết cho từng câu hỏi nghiên cứu nằm tại [**`bao_cao_ket_qua_chi_tiet_topic2.md`**](./bao_cao_ket_qua_chi_tiet_topic2.md).
 
-### 4.1. Phân loại chi tiết các Chỉ số Đánh giá (Metrics)
+---
+
+<a id="he-thong-5-rq"></a>
+### 4.1. Hệ thống 5 Câu hỏi Nghiên cứu Trọng tâm (Từ Nhánh 1, Nhánh 2 đến Cụm Liên hoàn Nhánh 3 – 4 – 5)
+
+Dựa trên đề cương gốc ([`topic2.md` Mục 3.2](./topic2.md)) và nguyên tắc **Thực nghiệm Cô lập Biến số (*Ceteris Paribus*)**, đề tài thiết lập **5 Câu hỏi Nghiên cứu (`RQ1` $\to$ `RQ5`)** chia làm 2 cụm logic:
+
+#### Cụm I — Khởi đầu & Khảo sát Cơ sở (Giải quyết tuần tự tại Nhánh 1 và Nhánh 2)
+* **RQ1 (Trả lời tại Nhánh 1 — Tái lập Đường cơ sở Bài báo nền & Kiểm định Điểm mù Nhóm hiếm):**
+  *Phương pháp tối ưu hóa submodular không trọng số (`Unweighted Facility Location`, $\alpha = 0.0$) trên tương đồng trình tự `BLASTp` của bài báo nền tái lập độ nhạy toàn cục (`Overall Sensitivity`) theo ngân sách $k$ như thế nào, và bộc lộ những điểm mù gì khi hoàn toàn thiếu các chỉ số đánh giá phân họ hiếm?*
+* **RQ2 (Khảo sát bước đầu tại Nhánh 2 — Đề xuất Hàm trọng số & Bộ chỉ số Nội phân họ trên `BLASTp`):**
+  *Khi đề xuất bộ chỉ số nhóm hiếm dưới cơ chế **Truy vấn Ngược Nội Phân Họ ($S_k \cap V_g \to V_g$)** và hàm mục tiêu có trọng số $w_v^{(\alpha)} = (n_{g(v)})^{-\alpha}$ ($\alpha \in \{0.0, 0.5, 1.0\}$) khảo sát bước đầu trên `BLASTp`, độ nhạy nhóm hiếm cải thiện ra sao mà không làm suy giảm đáng kể `Overall Sensitivity`? (Và tại sao kết quả trên `BLASTp` mới chỉ là bước đệm, chưa đủ cơ sở kết luận toàn diện do `BLASTp` chưa biểu diễn được tương đồng ngữ nghĩa – cấu trúc sâu?)*
+
+#### Cụm II — Trọng tâm Liên hoàn: Kết hợp Cả 3 Nhánh (Nhánh 3 + Nhánh 4 + Nhánh 5) để Trả lời 3 Câu hỏi Chung
+*(Từng nhánh riêng lẻ không thể tự trả lời trọn vẹn, mà phải kết hợp cả 3 nhánh: **Nhánh 3** đưa bài toán sang không gian ngữ nghĩa `ESM-2`; **Nhánh 4** tái kiểm định chéo $2 \times 2$ để đưa ra cái nhìn đầy đủ và tổng quan nhất về kết quả chung; **Nhánh 5** phân tích sâu kết quả trực tiếp của các nhóm hiếm và độ dư thừa trong tập đại diện $S_k$ nhằm chỉ ra phương pháp nào có tập đại diện thực sự tốt hơn)*:
+* **RQ3 (Kết hợp Nhánh 3, 4, 5 — Hiệu quả của Không gian Biểu diễn `ESM-2` vs. `BLASTp`):**
+  *Sử dụng không gian nhúng ngữ nghĩa `ESM-2` có tạo ra được tập đại diện $S_k$ tốt hơn `BLASTp` hay không?*
+* **RQ4 (Kết hợp Nhánh 3, 4, 5 — Kiểm định Giá trị Thực sự của Hàm Mục tiêu Có Trọng số $w_v^{(\alpha)}$):**
+  *Vượt qua hạn chế biểu diễn cục bộ của `BLASTp` ở Nhánh 2, hàm mục tiêu có trọng số ưu tiên nhóm hiếm thực sự có tốt hơn hàm không trọng số trên mọi không gian biểu diễn, hệ quy chiếu đánh giá và cấu trúc tập đại diện $S_k$ hay không?*
+* **RQ5 (Kết hợp Nhánh 3, 4, 5 — Sự Đột phá của Tổ hợp `ESM-2 + Hàm Trọng số` vs. Sử dụng Riêng lẻ):**
+  *Khi sử dụng `ESM-2` cộng với `Hàm trọng số` ($\alpha \in \{0.5, 1.0\}$) thì kết quả tạo ra sự đột phá như thế nào cho nhóm hiếm, và nếu chỉ sử dụng riêng lẻ từng thành phần (chỉ dùng `ESM-2` không trọng số hoặc chỉ dùng `Hàm trọng số` trên `BLASTp`) thì có đạt được kết quả tương tự hay không?*
+
+> 📌 **Lý giải Phương pháp luận: Tại sao chuyển hóa bài toán `Annotation Transfer` (trong đề cương sơ bộ `topic2.md`) thành `Truy vấn Ngược Nội Phân Họ ($S_k \cap V_g \to V_g$)` và `Tỷ lệ Đại diện Trực tiếp Phân họ ($S_k \cap V_g \ne \emptyset$)`?**
+> 1. **Nhiễu chưa định danh `[A01.UPA]` và 18 phân họ đơn độc (*singleton*, $n_g = 1$)**: Tập dữ liệu chuẩn hóa Phương án 3B ($4,120$ chuỗi sau khi lọc $9,187$ chuỗi `[A01.UPA]`) gồm $115$ phân họ và $45$ phân họ hiếm ($n_g \le 5$), trong đó có **$18$ phân họ hiếm chỉ chứa đúng $1$ chuỗi duy nhất ($n_g = 1$)**. Nếu chia tập kiểm tra $V \setminus S_k$ để tính `1-NN Annotation Transfer F1`: khi chuỗi duy nhất đó được chọn vào $S_k$ thì tập kiểm tra rỗng ($V_g \setminus S_k = \emptyset$); ngược lại nếu không được chọn thì thư viện $S_k$ mất hoàn toàn nhãn phân họ đó ($\text{F1} = 0\%$).
+> 2. **Khử "Ảo giác Bắn tràn Liên phân họ"**: Phép truy vấn toàn cục không phân biệt phân họ (Nhánh 1) cho phép đại diện của họ lớn bắn tràn (*cross-hit*) sang họ hiếm ở ngưỡng $E \le 10^{-7}$, gây ảo giác bao phủ dù họ hiếm không hề có mặt trong $S_k$. Do đó, việc kết hợp **Truy vấn Ngược Nội Phân Họ ($S_k \cap V_g \to V_g$, Nhánh 2–4)** và **Đếm Trực tiếp Tỷ lệ Đại diện Phân họ & Độ dư thừa Ngân sách (Nhánh 5)** là thước đo chính xác và trực diện nhất.
+
+---
+
+### 4.2. Phân loại chi tiết các Chỉ số Đánh giá (Metrics)
 
 #### PHẦN A: Các chỉ số ĐÃ CÓ ở Bài báo nền (Phương pháp mới cần DUY TRÌ TƯƠNG ĐƯƠNG)
 Đây là các chỉ số mà bài báo nền (*Nguyen et al., 2025*) đã sử dụng để đánh giá trên toàn thể họ protein (coi họ protein như một khối phẳng đồng nhất):
 
 1. **Overall Sensitivity / Completeness (Độ nhạy toàn thể qua BLAST)**:
    * *Bản chất*: Tỷ lệ phần trăm chuỗi trong toàn bộ Ground Set $V$ được tìm thấy lại khi dùng tập đại diện $S$ làm Query BLAST.
-   * *Mục tiêu phương pháp mới*: Duy trì ở mức cao ($\ge 98\% - 100\%$), **không được suy giảm quá $1\% - 2\%$** so với bài báo nền.
+   * *Vai trò kiểm chứng*: Đối chuẩn tái lập ở Nhánh 1 và theo dõi mức độ bảo toàn độ bao phủ tổng thể khi bật trọng số ưu tiên nhóm hiếm ($\alpha \in \{0.5, 1.0\}$) ở Nhánh 2, 3, 4.
 2. **Overall Specificity / Error Rate (Độ đặc hiệu & Tỷ lệ sai số chéo họ)**:
-   * *Bản chất*: Khả năng nhận diện chính xác protein trong họ mà không bị bắt nhầm sang các họ khác trong cơ sở dữ liệu.
-   * *Mục tiêu phương pháp mới*: Duy trì Specificity xấp xỉ $1.0$, tỷ lệ sai số bắt nhầm $\le 0.02\%$.
-3. **Kích thước tập đại diện & Tính giảm dư thừa (Set Size / Redundancy)**:
-   * *Bản chất*: Số lượng chuỗi cần chọn để đạt độ bao phủ mong muốn ở ngân sách $k$, và mức độ trùng lặp giữa các chuỗi bên trong tập $S$ ($\text{Pairwise Redundancy}$).
-   * *Mục tiêu phương pháp mới*: Tập $S$ giữ được tính tinh gọn cao, không chọn các chuỗi "sinh đôi" dư thừa.
+   * *Bản chất*: Khả năng nhận diện chính xác protein trong họ mà không bị bắt nhầm sang các họ khác trong cơ sở dữ liệu (đã được bài báo nền chứng minh trên 27 họ TE).
+3. **Kích thước tập đại diện & Đường cong ngân sách (Set Size & Coverage vs. Budget $k$ Curve)**:
+   * *Bản chất*: Tốc độ tích lũy độ bao phủ khi tăng dần ngân sách $k$ (từ $k \in [1..11]$ trong bài báo nền mở rộng lên 20 mốc $k \in [1..115]$ tiến tới tổng số phân họ $G = 115$).
 4. **Độ tương đồng với Chuẩn chuyên gia (Sequence Identity with Benchmark)**:
-   * *Bản chất*: Mức độ tương đồng về chuỗi/cấu trúc giữa tập thuật toán chọn và tập do chuyên gia sinh học giám định thủ công (ví dụ ThYme DB).
-   * *Mục tiêu phương pháp mới*: Đạt độ tương đồng cao ($>80\% - 95\%$) ở các họ chuẩn.
-5. **Đường cong ngân sách (Coverage vs. Budget $k$ Curve)**:
-   * *Bản chất*: Tốc độ tích lũy độ bao phủ khi tăng dần ngân sách $k$ từ $1, 2, 5, \dots, k$.
-   * *Mục tiêu phương pháp mới*: Tốc độ bao phủ nhanh ngay từ những giá trị $k$ rất nhỏ ($k=2$ đạt $\approx 80\%$).
+   * *Bản chất*: Mức độ tương đồng về chuỗi giữa tập thuật toán chọn và tập do chuyên gia sinh học giám định thủ công trong ThYme DB.
 
 ---
 
 <a id="phan-b-cac-chi-so-danh-gia-moi"></a>
-#### PHẦN B: Các chỉ số ĐÁNH GIÁ MỚI BỔ SUNG (Bài báo nền HOÀN TOÀN CHƯA CÓ)
-*(Nhấp vào tên các chỉ số có gạch chân bên dưới để mở [**tệp giai_thich_khai_niem.md**](./giai_thich_khai_niem.md#cac-chi-so-danh-gia-moi) xem công thức chi tiết, [**cách tính Coverage(g)**](./giai_thich_khai_niem.md#coverage-g), [**ví dụ thực tế bằng số từng bước**](./giai_thich_khai_niem.md#vi-du-tinh-toan-chi-tiet) và [**bản chất phân biệt Worst Coverage vs. Representation Rate**](./giai_thich_khai_niem.md#so-sanh-worst-va-representation))*:
+#### PHẦN B: Các chỉ số ĐÁNH GIÁ MỚI BỔ SUNG (Bài báo nền HOÀN TOÀN CHƯA CÓ — Trả lời RQ2 $\to$ RQ5)
+*(Tra cứu công thức toán học và ví dụ tính tay từng bước tại [**`tong_hop_cac_chi_so_danh_gia.md`**](./tong_hop_cac_chi_so_danh_gia.md))*:
 
-1. [**Macro Coverage (Độ bao phủ trung bình đều qua các phân họ)**](./giai_thich_khai_niem.md#macro-coverage):
-   * *Công thức*: $\text{Macro Coverage} = \frac{1}{|G|} \sum_{g \in G} \text{Coverage}(g)$ (với $|G|$ là tổng số phân họ/nhóm; xem [cách tính Coverage(g)](./giai_thich_khai_niem.md#coverage-g)).
-   * *Bản chất & Vai trò*: Đo lường **mặt bằng chung phân bố qua các phân họ (Balanced Central Tendency)** bằng cách gán trọng số bình đẳng $1/|G|$ cho mỗi phân họ. Chỉ số này phản ánh chất lượng đại diện tổng quan trên toàn bộ phổ phân họ, đồng thời đóng vai trò làm đối trọng kiểm chứng chất lượng toàn diện (giúp phát hiện thuật toán tốt toàn cục, tránh việc chỉ số bị méo mó bởi 1-2 chuỗi rác/outlier như khi chỉ nhìn vào Worst-case).
-2. [**Worst-Group Coverage (Độ bao phủ của nhóm hiếm nhất / thiệt thòi nhất — Chỉ số trọng tâm cho nhóm hiếm)**](./giai_thich_khai_niem.md#worst-group-coverage):
-   * *Công thức*: $\text{Worst-Group Coverage} = \min_{g \in G} \text{Coverage}(g)$.
-   * *Mục tiêu phương pháp mới*: **Vượt trội hoàn toàn so với bài báo nền** (trong khi bài báo nền thường bỏ rơi nhóm hiếm dẫn đến Worst-Group Coverage $= 0\%$, phương pháp mới đảm bảo nhóm hiếm nhất vẫn đạt độ bao phủ cao, xóa bỏ vùng tối dữ liệu).
-3. [**Rare Group Representation Rate (Tỷ lệ nhóm hiếm có đại diện trực tiếp)**](./giai_thich_khai_niem.md#rare-group-representation):
-   * *Bản chất*: Tỷ lệ phần trăm các phân họ hiếm có ít nhất 1 chuỗi lọt vào tập đại diện $S$ ($S \cap g \neq \emptyset$).
-   * *Mục tiêu phương pháp mới*: Đạt tỷ lệ tối đa ($80\% - 100\%$ các nhóm hiếm có đại diện trong top $k$ để giữ mẫu vật thực tế cho phòng lab).
-   * 🔍 *Xem thêm*: [So sánh sự khác biệt bản chất và mục tiêu giữa Worst-Group Coverage và Rare Group Representation Rate](./giai_thich_khai_niem.md#so-sanh-worst-va-representation).
-4. [**Annotation Transfer Macro-F1 & Worst-Group F1 (Độ chính xác gán nhãn hạ nguồn)**](./giai_thich_khai_niem.md#annotation-transfer):
-   * *Bản chất*: Lấy tập đại diện $S$ đã có nhãn làm "cơ sở tri thức", dùng Nearest Neighbor phân loại nhãn phân họ/chức năng cho các chuỗi còn lại trong Ground Set $V \setminus S$.
-   * *Mục tiêu phương pháp mới*: **Macro-F1 toàn cục và F1 riêng của các nhóm hiếm phải vượt trội rõ rệt** so với khi dùng tập đại diện của bài báo nền.
+1. **Rare Subfamily Sensitivity / Coverage (Độ nhạy / Độ bao phủ nội phân họ trung bình trên các phân họ hiếm $n_g \le 5$)**:
+   * *Công thức*: $\operatorname{Rare\_Cov}(S_k) = \frac{1}{|G_{\text{rare}}|} \sum_{g \in G_{\text{rare}}} \operatorname{Cov}_g^{\text{within}}(S_k)$ (với $|G_{\text{rare}}| = 45$ phân họ hiếm trên `MEROPS_A1A_curated`).
+   * *Bản chất & Vai trò*: Đo lường trực tiếp khả năng thu hồi nội phân họ dành riêng cho nhóm các phân họ hiếm ($\le 5$ chuỗi) dưới cả hai hệ quy chiếu `Live BLASTp Sensitivity (%)` (Nhánh 2, 4) và `Coverage ESM (%)` (Nhánh 3, 4).
+2. **Macro Sensitivity / Coverage (Độ nhạy / Độ bao phủ nội phân họ trung bình bình đẳng trên toàn bộ $G = 115$ phân họ)**:
+   * *Công thức*: $\operatorname{Macro\_Cov}(S_k) = \frac{1}{G} \sum_{g=1}^{G} \operatorname{Cov}_g^{\text{within}}(S_k)$.
+   * *Bản chất & Vai trò*: Đo lường **mặt bằng chung phân bố qua các phân họ** bằng cách cấp quyền biểu quyết bình đẳng $1/G$ cho mỗi phân họ, bất kể phân họ đó có $329$ chuỗi hay chỉ có $1$ chuỗi.
+3. **Worst-Group Sensitivity / Coverage & Zero-Coverage Subfamilies Count (Độ bao phủ nhóm thiệt thòi nhất & Số phân họ bị bỏ rơi $0\%$)**:
+   * *Công thức*: $\operatorname{Worst\_Cov}(S_k) = \min_{g \in \{1..G\}} \operatorname{Cov}_g^{\text{within}}(S_k)$ và $\operatorname{Zero\_Count}(S_k) = |\{g \in \{1..G\} \mid \operatorname{Sens}_g^{\text{within}}(S_k) = 0.0\%\}|$.
+   * *Bản chất & Vai trò*: Kiểm tra chốt chặn công bằng cực tiểu và đếm chính xác số lượng phân họ bị bỏ trống hoàn toàn tại mỗi mức ngân sách $k$.
+4. **Subfamily & Rare Group Representation Rate (Tỷ lệ phân họ trên $115$ họ và họ hiếm trên $45$ họ có đại diện trực tiếp trong $S_k$ — Nhánh 5)**:
+   * *Công thức*: $\operatorname{Subfamily\_Repr}(S_k) = \frac{|\mathcal{G}(S_k)|}{115} \times 100\%$ và $\operatorname{Rare\_Repr}(S_k) = \frac{|\mathcal{G}_{\text{rare}}(S_k)|}{45} \times 100\%$.
+   * *Bản chất & Vai trò*: Đếm trực tiếp số phân họ có ít nhất 1 chuỗi đại diện góp mặt trong thư viện $S_k$ ($S_k \cap V_g \ne \emptyset$).
+5. **Subfamily Allocation Redundancy & Dominant Group Share (Độ dư thừa phân bổ phân họ & Tỷ trọng độc chiếm của họ lớn nhất `A01.009` — Nhánh 5)**:
+   * *Công thức*: $\operatorname{Subfamily\_Redundancy}(S_k) = \frac{k - |\mathcal{G}(S_k)|}{k} \times 100\%$ và $\operatorname{Dominant\_Share}(S_k) = \frac{|S_k \cap V_{\text{A01.009}}|}{k} \times 100\%$.
+   * *Bản chất & Vai trò*: Định lượng tỷ lệ ngân sách bị tiêu tốn vào việc chọn lặp lại nhiều đại diện trong cùng một phân họ lớn để trả lời trực diện câu hỏi **RQ5**.
 
 ---
 
-### 4.2. Bảng Tổng hợp Đối đầu các Chỉ số: Bài báo nền vs. RareProtSelect
+### 4.3. Bảng Tổng hợp Đối đầu các Chỉ số: Bài báo nền vs. RareProtSelect
 
-| Nhóm chỉ số | Tên chỉ số cụ thể | Trạng thái ở Bài báo nền | Vai trò & Yêu cầu đối với Phương pháp mới (RareProtSelect) |
+| Nhóm chỉ số | Tên chỉ số cụ thể | Trạng thái ở Bài báo nền | Vai trò Kiểm chứng trong Chuỗi Thực nghiệm Nhánh 1 $\to$ Nhánh 5 |
 | :--- | :--- | :---: | :--- |
-| **1. Chỉ số ĐỘT PHÁ CHO NHÓM HIẾM (Core Rare Improvements)** | **Worst-Group Coverage** | ❌ Chưa có | **$\uparrow$ Vượt trội hoàn toàn (Bài báo nền $\approx 0\%$, phương pháp mới đảm bảo cận dưới an toàn)** |
-| | **Rare Group Representation Rate** | ❌ Chưa có | **$\uparrow$ Bao phủ $\ge 80\% - 100\%$ các nhóm hiếm (giữ mẫu vật thực tế cho phòng lab)** |
-| | **Worst-Group F1 (Annotation Transfer)** | ❌ Chưa có | **$\uparrow$ Nâng cao vượt bậc độ chính xác gán nhãn cho các phân họ hiếm** |
-| **2. Chỉ số ĐO MẶT BẰNG CHUNG (Central Tendency & Scale)** | **Macro Coverage** | ❌ Chưa có | **Đo mặt bằng chung phân bố qua các phân họ (đối trọng chống outlier, kỳ vọng cải thiện ở dữ liệu mất cân bằng)** |
-| | **Overall Coverage / Sensitivity** | ✅ Đã có | **$\approx$ Đo quy mô tổng thể theo đầu chuỗi, duy trì tương đương (giảm không quá $1\% - 2\%$)** |
-| | **Annotation Transfer Macro-F1** | ❌ Chưa có | **$\uparrow$ Đo độ chính xác gán nhãn trung bình qua tất cả các lớp** |
-| **3. Chỉ số KIỂM SOÁT CHẤT LƯỢNG & TINH GỌN (Quality & Parity)** | **Overall Specificity** | ✅ Đã có | **$\approx$ Duy trì độ tinh sạch cao, sai số bắt nhầm $\le 0.02\%$** |
-| | **Tính tinh gọn (Redundancy / Size $k$)** | ✅ Đã có | **$\approx$ Kích thước tập nhỏ gọn, không chọn các chuỗi sinh đôi dư thừa** |
-
+| **1. Nhóm Chỉ số BẢO TỒN NHÓM HIẾM (Trả lời RQ2, RQ3, RQ4)** | **`rare_sensitivity_blast_pct` & `rare_coverage_esm_pct`** | ❌ Chưa có | Đo độ thu hồi và bao phủ nội phân họ trung bình trên $45$ phân họ hiếm ($n_g \le 5$) |
+| | **`worst_group_sensitivity_blast_pct` & `worst_group_coverage_esm_pct`** | ❌ Chưa có | Đo cận dưới bao phủ của phân họ thiệt thòi nhất trong $115$ phân họ |
+| | **`zero_cov_subfamilies_count`** | ❌ Chưa có | Đếm số phân họ bị bỏ rơi hoàn toàn ($\operatorname{Sens}_g^{\text{within}} = 0.0\%$) |
+| **2. Nhóm Chỉ số ĐO MẶT BẰNG CHUNG & TOÀN CỤC (Trả lời RQ1, RQ2, RQ3, RQ4)** | **`macro_sensitivity_blast_pct` & `macro_coverage_esm_pct`** | ❌ Chưa có | Đo mặt bằng chung bình đẳng ($1/115$) qua toàn bộ các phân họ |
+| | **`overall_sensitivity_blast_pct` & `overall_coverage_esm_pct`** | ✅ Đã có *(bản BLAST toàn cục)* | Đối chuẩn Hình 8A (Nhánh 1) và kiểm tra mức độ đánh đổi toàn cục khi ưu tiên nhóm hiếm (Nhánh 2, 3, 4) |
+| **3. Nhóm Chỉ số CẤU TRÚC ĐẠI DIỆN & ĐỘ DƯ THỪA NGÂN SÁCH (Trả lời RQ5)** | **`subfamily_repr_rate_pct` & `rare_repr_rate_pct`** | ❌ Chưa có | Đo tỷ lệ `%` phân họ ($/115$) và họ hiếm ($/45$) có đại diện trực tiếp trong $S_k$ |
+| | **`subfamily_redundancy_pct` & `dominant_a01_009_share_pct`** | ❌ Chưa có | Đo tỷ lệ `%` ghế ngân sách bị chọn trùng phân họ và mức độ lấn át của họ lớn nhất `A01.009` |
 
 ---
 
-### 4.3. Các chỉ số CẦN ĐÁNH GIÁ THÊM để bài báo chặt chẽ tuyệt đối (Ablation & Efficiency)
+### 4.4. Thiết kế Chuỗi Thực nghiệm Cô lập Biến số (*Ceteris Paribus* — Nhánh 1 $\to$ Nhánh 5)
 
-Để ban giám khảo hoặc người phản biện (reviewer) không thể bắt bẻ, đề tài bắt buộc thực hiện 3 thực nghiệm bóc tách (*Ablation Study*) và đo lường hiệu năng:
+Quy trình thực nghiệm được thiết kế chặt chẽ thành 5 nhánh nhằm giải quyết trọn vẹn 2 cụm câu hỏi nghiên cứu:
 
-1. **Bóc tách vai trò của ESM-2 vs. BLAST**:
-   * *Cách thực hiện*: Chạy **Unweighted FL với BLAST** (Bài báo nền) **vs.** **Unweighted FL với ESM-2**.
-   * *Mục đích*: Chứng minh riêng việc chuyển đổi từ ký tự thô sang vector nhúng ESM-2 đã giúp nắm bắt mối quan hệ sinh học sâu (*Remote Homology* — cùng cấu trúc 3D/chức năng dù đột biến chuỗi) vượt trội hơn BLAST ra sao.
-2. **Bóc tách vai trò của Hàm trọng số (Weighting Function)**:
-   * *Cách thực hiện*: So sánh trực diện 3 lựa chọn trọng số trên cùng mô hình ESM-2 WFL:
-     * **Không trọng số**: $w = 1$ (hoặc $1/|V|$)
-     * **Căn bậc hai nghịch đảo (Rare-Aware)**: $w_v = 1/\sqrt{n_{g(v)}}$
-     * **Nghịch đảo thuần**: $w_v = 1/n_{g(v)}$
-   * *Mục đích*: Chứng minh vì sao trọng số $1/\sqrt{n_g}$ là **điểm cân bằng toán học tối ưu nhất** (vừa đủ mạnh để cứu nhóm hiếm mà không làm sụp đổ Overall Coverage như $1/n_g$).
-3. **Đo lường chi phí tính toán (Computational Efficiency)**:
-   * *Cách thực hiện*: Đo lường thời gian chạy (**Runtime**) và bộ nhớ đỉnh (**Peak Memory**).
-   * *Mục đích*: Chứng minh thuật toán **Lazy Greedy (dùng Max-Heap)** chạy nhanh gấp hàng chục đến hàng trăm lần so với Standard Greedy trên các siêu họ protein lớn (như CE 12,277 chuỗi hay A1A 13,847 chuỗi), đáp ứng hoàn hảo yêu cầu tính toán thực tế.
+1. **Nhánh 1 (Trả lời `RQ1` — Đối chuẩn Bài báo nền & Phát hiện Điểm mù Nhóm hiếm)**:
+   * Chạy **Unweighted Facility Location ($\alpha = 0.0$)** trên $\mathbf{S}_{\text{BLAST}}$ với $13,307$ chuỗi tại $k \in [1..11]$ để tái lập Hình 8 Panel A (*Nguyen et al., 2025*) và chỉ ra việc thiếu hoàn toàn các thước đo nhóm hiếm.
+2. **Nhánh 2 (Trả lời `RQ2` — Khảo sát Bước đầu Hàm trọng số & Bộ chỉ số Nội phân họ trên `BLASTp`)**:
+   * Đề xuất bộ chỉ số nhóm hiếm dưới cơ chế **Truy vấn Ngược Nội Phân Họ ($S_k \cap V_g \to V_g$)** trên tập chuẩn hóa Phương án 3B ($4,120$ chuỗi, $115$ họ, $45$ họ hiếm) và khảo sát hàm trọng số $w_v^{(\alpha)} = n_g^{-\alpha}$ ($\alpha \in \{0.0, 0.5, 1.0\}$) trên $\mathbf{S}_{\text{BLAST}}$. Do `BLASTp` chỉ đo tương đồng chuỗi cục bộ bề mặt nên Nhánh 2 mới dừng ở khảo sát bước đầu, chưa đủ cơ sở để kết luận toàn diện.
+3. **Cụm Liên hoàn Nhánh 3 + Nhánh 4 + Nhánh 5 (Cùng kết hợp để trả lời dứt điểm `RQ3`, `RQ4`, `RQ5`)**:
+   * **Nhánh 3 (Đưa vào Không gian Ngữ nghĩa `ESM-2`)**: Thay $\mathbf{S}_{\text{BLAST}}$ bằng $\mathbf{S}_{\text{ESM}}^{(\beta=0.70)}$ và khảo sát $\alpha \in \{0.0, 0.5, 1.0\}$ trên thước đo nội tại `Within-Subfamily Coverage ESM (%)`.
+   * **Nhánh 4 (Tái kiểm định chéo $2 \times 2$ — Bức tranh Tổng quan Toàn diện)**: Đánh giá chéo cả 6 tập đại diện (`BLASTp-Selected` và `ESM2-Selected`) đồng thời trên cả 2 mặt trận (`Live BLASTp Sensitivity %` & `Coverage ESM %`) để có cái nhìn đầy đủ và khách quan nhất về kết quả chung.
+   * **Nhánh 5 (Phân tích sâu Nhóm hiếm & Độ dư thừa trực tiếp trong Tập $S_k$)**: Đi sâu kiểm đếm trực tiếp số phân họ (`/115`), số phân họ hiếm (`/45`) có đại diện trong $S_k$ và độ dư thừa ngân sách (`Redundancy`), từ đó kết hợp với Nhánh 3 và Nhánh 4 để trả lời trực diện 3 câu hỏi chung: **(1) `RQ3`: `ESM-2` có tạo tập $S_k$ tốt hơn `BLASTp` không?** **(2) `RQ4`: Hàm trọng số thực sự tốt hơn không?** **(3) `RQ5`: Tổ hợp `ESM-2 + Hàm trọng số` đột phá như thế nào so với dùng riêng lẻ?**
 
 ---
 
